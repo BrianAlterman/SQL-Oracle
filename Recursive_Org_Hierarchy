@@ -1,0 +1,15 @@
+SELECT org.name
+FROM hr.hr_all_organization_units org,
+  (SELECT DISTINCT(t1.organization_id_child) AS "MAT"
+  FROM HR.per_org_structure_elements t1
+    START WITH t1.organization_id_parent =
+    (SELECT organization_id
+    FROM hr.hr_all_organization_units
+    WHERE name = :Org_Name
+    )
+    CONNECT BY PRIOR t1.organization_id_child = t1.organization_id_parent
+  )
+WHERE "MAT" = org.organization_id
+and org.date_to is null
+union
+select :Org_Name from dual
