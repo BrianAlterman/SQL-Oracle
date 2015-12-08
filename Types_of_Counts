@@ -1,0 +1,73 @@
+--Hire counts by Day
+SELECT per.date_start       AS "HD",
+    COUNT(peo.EMPLOYEE_NUMBER) AS "CT"
+  FROM hr.per_all_people_f peo,
+    hr.per_periods_of_service per
+  WHERE per.date_start BETWEEN peo.effective_start_date AND peo.EFFECTIVE_END_DATE
+  AND per.date_start BETWEEN :PerStart AND :PerEnd
+  AND per.person_id = peo.person_id
+  GROUP BY per.date_start;
+ 
+--Average Daily Hires
+SELECT AVG("CT") as "Avg Daily Hires"
+FROM
+  (SELECT per.date_start       AS "HD",
+    COUNT(peo.EMPLOYEE_NUMBER) AS "CT"
+  FROM hr.per_all_people_f peo,
+    hr.per_periods_of_service per
+  WHERE per.date_start BETWEEN peo.effective_start_date AND peo.EFFECTIVE_END_DATE
+  AND per.date_start BETWEEN :PerStart AND :PerEnd
+  AND per.person_id = peo.person_id
+  GROUP BY per.date_start
+  );
+  
+--Termination counts by day
+SELECT per.actual_termination_date       AS "TD",
+    COUNT(peo.EMPLOYEE_NUMBER) AS "CT"
+  FROM hr.per_all_people_f peo,
+    hr.per_periods_of_service per
+  WHERE per.actual_termination_date BETWEEN peo.effective_start_date AND peo.EFFECTIVE_END_DATE
+  AND per.actual_termination_date BETWEEN :PerStart AND :PerEnd
+  AND per.person_id = peo.person_id
+  GROUP BY per.actual_termination_date;
+  
+--Average Daily terminations
+SELECT AVG("CT") as "Avg Daily Terms"
+FROM
+  (SELECT per.actual_termination_date       AS "TD",
+    COUNT(peo.EMPLOYEE_NUMBER) AS "CT"
+  FROM hr.per_all_people_f peo,
+    hr.per_periods_of_service per
+  WHERE per.actual_termination_date BETWEEN peo.effective_start_date AND peo.EFFECTIVE_END_DATE
+  AND per.actual_termination_date BETWEEN :PerStart AND :PerEnd
+  AND per.person_id = peo.person_id
+  GROUP BY per.actual_termination_date
+  );
+ 
+--Active Team Members by Date
+SELECT "a_date",
+  COUNT(peo.EMPLOYEE_NUMBER) AS "CT"
+FROM hr.per_all_people_f peo,
+  (SELECT DATE '2012-04-01'-1 + LEVEL AS "a_date"
+  FROM dual
+    CONNECT BY LEVEL <= DATE '2012-04-30'+2 - DATE '2012-04-01'-1
+  )
+WHERE peo.current_employee_flag = 'Y'
+AND "a_date" BETWEEN peo.effective_start_date AND peo.EFFECTIVE_END_DATE
+GROUP BY "a_date"
+ORDER BY "a_date"
+ 
+--Average Active Team Members by Month
+SELECT AVG("CT") as "Avg for Month"
+FROM
+  (SELECT "a_date",
+    COUNT(peo.EMPLOYEE_NUMBER) AS "CT"
+  FROM hr.per_all_people_f peo,
+    (SELECT DATE '2012-04-01'-1 + LEVEL AS "a_date"
+    FROM dual
+      CONNECT BY LEVEL <= DATE '2012-04-30'+2 - DATE '2012-04-01'-1
+    )
+  WHERE peo.current_employee_flag = 'Y'
+  AND "a_date" BETWEEN peo.effective_start_date AND peo.EFFECTIVE_END_DATE
+  GROUP BY "a_date"
+  )
