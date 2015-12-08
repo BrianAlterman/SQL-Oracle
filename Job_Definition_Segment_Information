@@ -1,0 +1,15 @@
+select peo.employee_number as "EID",
+       peo.full_name as "Full Name",
+       mat.ass_attribute2,
+       jdef.segment4
+from   hr.per_all_people_f peo,
+       hr.per_all_assignments_f mat,
+       hr.per_jobs jobs,
+       hr.per_job_definitions jdef
+where  peo.current_employee_flag = 'Y'
+--and    peo.employee_number = '610138'
+and    trunc(sysdate) between peo.effective_start_date and peo.effective_end_date
+and    trunc(sysdate) between mat.effective_start_date and mat.effective_end_date
+and    peo.person_id = mat.person_id
+and    mat.job_id = jobs.job_id
+and    jobs.job_definition_id = jdef.job_definition_id
