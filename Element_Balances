@@ -1,0 +1,21 @@
+SELECT e.full_name,
+  e.EMPLOYEE_NUMBER,
+  f.balance_name,
+  SUM(c.BALANCE_VALUE)
+FROM HR.per_all_assignments_F a,
+  kbace.xkb_balances b,
+  kbace.xkb_balance_details c,
+  hr.per_all_people_f e,
+  hr.pay_balance_types f
+WHERE e.PERSON_ID =a.PERSON_ID
+AND sysdate BETWEEN e.EFFECTIVE_START_DATE AND e.EFFECTIVE_END_DATE
+AND sysdate BETWEEN a.EFFECTIVE_START_DATE AND a.EFFECTIVE_END_DATE
+AND a.ASSIGNMENT_ID        = b.ASSIGNMENT_ID
+AND b.ASSIGNMENT_ACTION_ID =c.ASSIGNMENT_ACTION_ID
+AND c.balance_type_id      = f.BALANCE_type_id
+AND c.BALANCE_TYPE_ID      in ('498378','498379')                    
+AND b.EFFECTIVE_DATE BETWEEN '1-jan-2009' AND trunc(sysdate)
+AND e.employee_number IN ('677573','633289')
+GROUP BY e.full_name,
+  e.EMPLOYEE_NUMBER,
+  f.balance_name
