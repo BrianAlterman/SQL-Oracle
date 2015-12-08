@@ -1,0 +1,4 @@
+SELECT accrual_plan_name,
+  accrual_plan_id,
+  accrual_category
+FROM pay_accrual_plans
