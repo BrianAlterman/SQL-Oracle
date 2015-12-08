@@ -1,0 +1,33 @@
+SELECT peo.FULL_NAME,
+  peo.EMPLOYEE_NUMBER,
+  loc.LOCATION_CODE,
+  pet.element_name,
+  mat.assignment_number,
+  peev.effective_start_Date,
+  peev.effective_end_date,
+  piv.name,
+  peev.screen_entry_value
+FROM hr.per_all_people_f peo,
+  hr.per_all_assignments_f mat,
+  hr.PAY_ELEMENT_ENTRIES_F pee,
+  hr.PAY_ELEMENT_TYPES_F pet,
+  hr.pay_input_values_f piv,
+  hr.PAY_ELEMENT_ENTRY_VALUES_F peev,
+  HR.HR_LOCATIONS_ALL loc
+WHERE current_employee_flag ='Y'
+AND peo.person_id           = mat.person_id
+AND pet.element_type_id     = pee.element_type_id
+AND pee.assignment_id       = mat.assignment_id
+AND pet.element_type_id     = piv.element_type_id
+AND piv.input_value_id        = peev.input_value_id
+AND pee.element_entry_id    = peev.element_entry_id
+AND TRUNC(sysdate) BETWEEN peo.effective_start_Date AND peo.effective_end_Date
+AND TRUNC(sysdate) BETWEEN mat.effective_start_Date AND mat.effective_end_Date
+AND TRUNC(sysdate) BETWEEN pee.effective_start_Date AND pee.effective_end_Date
+AND TRUNC(sysdate) BETWEEN pet.effective_start_Date AND pet.effective_end_Date
+--AND piv.name = ''
+AND TRUNC(sysdate) BETWEEN piv.effective_start_date AND piv.effective_end_Date
+AND TRUNC(sysdate) BETWEEN peev.effective_Start_date AND peev.effective_end_Date
+AND mat.location_id = loc.location_id
+AND pet.element_name = 'FD Sick Corp DC FT Hourly PTO'
+AND peev.effective_end_date > TRUNC(sysdate)
