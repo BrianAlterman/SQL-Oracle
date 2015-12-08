@@ -1,0 +1,19 @@
+--Pulls from HR Lookup tables
+--MAR_STATUS
+SELECT DISTINCT A.MARITAL_STATUS,
+  z.meaning "Marital Status Desc",
+  a.employee_number
+FROM hr.per_all_people_f a,
+  apps.hr_lookups z
+WHERE TRUNC(sysdate) BETWEEN a.effective_start_date AND a.effective_end_date
+AND A.MARITAL_STATUS = z.lookup_code
+AND Z.lookup_type    = 'MAR_STATUS';
+
+--FDS_REBANNER_ASSOCIATES
+SELECT peo.employee_number AS "EIN",
+  look.lookup_code         AS "DT EIN"
+FROM hr.per_all_people_f peo,
+  apps.hr_lookups look
+WHERE TRUNC(sysdate) BETWEEN peo.effective_start_date AND peo.effective_end_date
+AND peo.employee_number = look.description
+AND look.lookup_type    = 'FDS_REBANNER_ASSOCIATES';
