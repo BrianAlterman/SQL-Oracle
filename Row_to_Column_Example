@@ -1,0 +1,447 @@
+SELECT peo.employee_number AS "EID",
+  peo.full_name            AS "Full Name",
+  "401EL"                  AS "401K Element",
+  "401SD"                  AS "401K Start",
+  "401ED"                  AS "401K End",
+  "401TP"                  AS "401K Type",
+  "401VAL"                 AS "401K Value",
+  "ESPPEL"                 AS "ESPP Element",
+  "ESPPSD"                 AS "ESPP Start",
+  "ESPPED"                 AS "ESPP End",
+  "ESPPTP"                 AS "ESPP Type",
+  "ESPPVAL"                AS "ESPP Value",
+  "BCBSEL"                 AS "BCBS Element",
+  "BCBSSD"                 AS "BCBS Start",
+  "BCBSED"                 AS "BCBS End",
+  "BCBSTP"                 AS "BCBS Type",
+  "BCBSVAL"                AS "BCBS Value",
+  "METEL"                  AS "MET Element",
+  "METSD"                  AS "MET Start",
+  "METED"                  AS "MET End",
+  "METTP"                  AS "MET Type",
+  "METVAL"                 AS "MET Value",
+  "EYEEL"                  AS "EYE Element",
+  "EYESD"                  AS "EYE Start",
+  "EYEED"                  AS "EYE End",
+  "EYETP"                  AS "EYE Type",
+  "EYEVAL"                 AS "EYE Value",
+  "FSAMEL"                 AS "FSA Med Element",
+  "FSAMSD"                 AS "FSA Med Start",
+  "FSAMED"                 AS "FSA Med End",
+  "FSAMTP"                 AS "FSA Med Type",
+  "FSAMVAL"                AS "FSA Med Value",
+  "FSADEL"                 AS "FSA Dep Element",
+  "FSADSD"                 AS "FSA Dep Start",
+  "FSADED"                 AS "FSA Dep End",
+  "FSADTP"                 AS "FSA Dep Type",
+  "FSADVAL"                AS "FSA Dep Value",
+  "VLEMPEL"                AS "Vol Life Emp Element",
+  "VLEMPSD"                AS "Vol Life Emp Start",
+  "VLEMPED"                AS "Vol Life Emp End",
+  "VLEMPTP"                AS "Vol Life Emp Type",
+  "VLEMPVAL"               AS "Vol Life Emp Value",
+  "VLSPEL"                 AS "Vol Life Sp Element",
+  "VLSPSD"                 AS "Vol Life Sp Start",
+  "VLSPED"                 AS "Vol Life Sp End",
+  "VLSPTP"                 AS "Vol Life Sp Type",
+  "VLSPVAL"                AS "Vol Life Sp Value",
+  "VLCHEL"                 AS "Vol Life Ch Element",
+  "VLCHSD"                 AS "Vol Life Ch Start",
+  "VLCHED"                 AS "Vol Life Ch End",
+  "VLCHTP"                 AS "Vol Life Ch Type",
+  "VLCHVAL"                AS "Vol Life Ch Value",
+  "LTDEL"                  AS "LTD Element",
+  "LTDSD"                  AS "LTD Start",
+  "LTDED"                  AS "LTD End",
+  "LTDTP"                  AS "LTD Type",
+  "LTDVAL"                 AS "LTD Value",
+  "STDEL"                  AS "STD Element",
+  "STDSD"                  AS "STD Start",
+  "STDED"                  AS "STD End",
+  "STDTP"                  AS "STD Type",
+  "STDVAL"                 AS "STD Value",
+  "FRNGEL"                 AS "FRNG Element",
+  "FRNGSD"                 AS "FRNG Start",
+  "FRNGED"                 AS "FRNG End",
+  "FRNGTP"                 AS "FRNG Type",
+  "FRNGVAL"                AS "FRNG Value"
+FROM hr.per_all_people_f peo,
+  (SELECT peo401.person_id       AS "401ID",
+    pet401.element_name          AS "401EL",
+    peev401.effective_start_Date AS "401SD",
+    peev401.effective_end_date   AS "401ED",
+    piv401.name                  AS "401TP",
+    peev401.screen_entry_value   AS "401VAL"
+  FROM hr.per_all_people_f peo401,
+    hr.per_all_assignments_f mat401,
+    hr.PAY_ELEMENT_ENTRIES_F pee401,
+    hr.PAY_ELEMENT_TYPES_F pet401,
+    hr.pay_input_values_f piv401,
+    hr.PAY_ELEMENT_ENTRY_VALUES_F peev401
+  WHERE peo401.person_id      = mat401.person_id
+  AND pet401.element_type_id  = pee401.element_type_id
+  AND pee401.assignment_id    = mat401.assignment_id
+  AND pet401.element_type_id  = piv401.element_type_id
+  AND piv401.input_value_id   = peev401.input_value_id
+  AND pee401.element_entry_id = peev401.element_entry_id
+  AND TRUNC(sysdate) BETWEEN peo401.effective_start_Date AND peo401.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN mat401.effective_start_Date AND mat401.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN pee401.effective_start_Date AND pee401.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN pet401.effective_start_Date AND pet401.effective_end_Date
+  AND piv401.name = 'Percentage'
+  AND TRUNC(sysdate) BETWEEN piv401.effective_start_date AND piv401.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN peev401.effective_Start_date AND peev401.effective_end_Date
+  AND pet401.element_name        = 'FD 401_K'
+  AND peev401.effective_end_date > TRUNC(sysdate)
+  ),
+  (SELECT peoESPP.person_id       AS "ESPPID",
+    petESPP.element_name          AS "ESPPEL",
+    peevESPP.effective_start_Date AS "ESPPSD",
+    peevESPP.effective_end_date   AS "ESPPED",
+    pivESPP.name                  AS "ESPPTP",
+    peevESPP.screen_entry_value   AS "ESPPVAL"
+  FROM hr.per_all_people_f peoESPP,
+    hr.per_all_assignments_f matESPP,
+    hr.PAY_ELEMENT_ENTRIES_F peeESPP,
+    hr.PAY_ELEMENT_TYPES_F petESPP,
+    hr.pay_input_values_f pivESPP,
+    hr.PAY_ELEMENT_ENTRY_VALUES_F peevESPP
+  WHERE peoESPP.person_id      = matESPP.person_id
+  AND petESPP.element_type_id  = peeESPP.element_type_id
+  AND peeESPP.assignment_id    = matESPP.assignment_id
+  AND petESPP.element_type_id  = pivESPP.element_type_id
+  AND pivESPP.input_value_id   = peevESPP.input_value_id
+  AND peeESPP.element_entry_id = peevESPP.element_entry_id
+  AND TRUNC(sysdate) BETWEEN peoESPP.effective_start_Date AND peoESPP.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN matESPP.effective_start_Date AND matESPP.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN peeESPP.effective_start_Date AND peeESPP.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN petESPP.effective_start_Date AND petESPP.effective_end_Date
+  AND pivESPP.name = 'Amount'
+  AND TRUNC(sysdate) BETWEEN pivESPP.effective_start_date AND pivESPP.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN peevESPP.effective_Start_date AND peevESPP.effective_end_Date
+  AND petESPP.element_name        = 'FD ESPP1'
+  AND peevESPP.effective_end_date > TRUNC(sysdate)
+  ),
+  (SELECT peoBCBS.person_id       AS "BCBSID",
+    petBCBS.element_name          AS "BCBSEL",
+    peevBCBS.effective_start_Date AS "BCBSSD",
+    peevBCBS.effective_end_date   AS "BCBSED",
+    pivBCBS.name                  AS "BCBSTP",
+    peevBCBS.screen_entry_value   AS "BCBSVAL"
+  FROM hr.per_all_people_f peoBCBS,
+    hr.per_all_assignments_f matBCBS,
+    hr.PAY_ELEMENT_ENTRIES_F peeBCBS,
+    hr.PAY_ELEMENT_TYPES_F petBCBS,
+    hr.pay_input_values_f pivBCBS,
+    hr.PAY_ELEMENT_ENTRY_VALUES_F peevBCBS
+  WHERE peoBCBS.person_id      = matBCBS.person_id
+  AND petBCBS.element_type_id  = peeBCBS.element_type_id
+  AND peeBCBS.assignment_id    = matBCBS.assignment_id
+  AND petBCBS.element_type_id  = pivBCBS.element_type_id
+  AND pivBCBS.input_value_id   = peevBCBS.input_value_id
+  AND peeBCBS.element_entry_id = peevBCBS.element_entry_id
+  AND TRUNC(sysdate) BETWEEN peoBCBS.effective_start_Date AND peoBCBS.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN matBCBS.effective_start_Date AND matBCBS.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN peeBCBS.effective_start_Date AND peeBCBS.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN petBCBS.effective_start_Date AND petBCBS.effective_end_Date
+  AND pivBCBS.name = 'Amount'
+  AND TRUNC(sysdate) BETWEEN pivBCBS.effective_start_date AND pivBCBS.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN peevBCBS.effective_Start_date AND peevBCBS.effective_end_Date
+  AND petBCBS.element_name        = 'FD Medical1'
+  AND peevBCBS.effective_end_date > TRUNC(sysdate)
+  ),
+  (SELECT peoMET.person_id       AS "METID",
+    petMET.element_name          AS "METEL",
+    peevMET.effective_start_Date AS "METSD",
+    peevMET.effective_end_date   AS "METED",
+    pivMET.name                  AS "METTP",
+    peevMET.screen_entry_value   AS "METVAL"
+  FROM hr.per_all_people_f peoMET,
+    hr.per_all_assignments_f matMET,
+    hr.PAY_ELEMENT_ENTRIES_F peeMET,
+    hr.PAY_ELEMENT_TYPES_F petMET,
+    hr.pay_input_values_f pivMET,
+    hr.PAY_ELEMENT_ENTRY_VALUES_F peevMET
+  WHERE peoMET.person_id      = matMET.person_id
+  AND petMET.element_type_id  = peeMET.element_type_id
+  AND peeMET.assignment_id    = matMET.assignment_id
+  AND petMET.element_type_id  = pivMET.element_type_id
+  AND pivMET.input_value_id   = peevMET.input_value_id
+  AND peeMET.element_entry_id = peevMET.element_entry_id
+  AND TRUNC(sysdate) BETWEEN peoMET.effective_start_Date AND peoMET.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN matMET.effective_start_Date AND matMET.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN peeMET.effective_start_Date AND peeMET.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN petMET.effective_start_Date AND petMET.effective_end_Date
+  AND pivMET.name = 'Amount'
+  AND TRUNC(sysdate) BETWEEN pivMET.effective_start_date AND pivMET.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN peevMET.effective_Start_date AND peevMET.effective_end_Date
+  AND petMET.element_name        = 'FD Dental1'
+  AND peevMET.effective_end_date > TRUNC(sysdate)
+  ),
+  (SELECT peoEYE.person_id       AS "EYEID",
+    petEYE.element_name          AS "EYEEL",
+    peevEYE.effective_start_Date AS "EYESD",
+    peevEYE.effective_end_date   AS "EYEED",
+    pivEYE.name                  AS "EYETP",
+    peevEYE.screen_entry_value   AS "EYEVAL"
+  FROM hr.per_all_people_f peoEYE,
+    hr.per_all_assignments_f matEYE,
+    hr.PAY_ELEMENT_ENTRIES_F peeEYE,
+    hr.PAY_ELEMENT_TYPES_F petEYE,
+    hr.pay_input_values_f pivEYE,
+    hr.PAY_ELEMENT_ENTRY_VALUES_F peevEYE
+  WHERE peoEYE.person_id      = matEYE.person_id
+  AND petEYE.element_type_id  = peeEYE.element_type_id
+  AND peeEYE.assignment_id    = matEYE.assignment_id
+  AND petEYE.element_type_id  = pivEYE.element_type_id
+  AND pivEYE.input_value_id   = peevEYE.input_value_id
+  AND peeEYE.element_entry_id = peevEYE.element_entry_id
+  AND TRUNC(sysdate) BETWEEN peoEYE.effective_start_Date AND peoEYE.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN matEYE.effective_start_Date AND matEYE.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN peeEYE.effective_start_Date AND peeEYE.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN petEYE.effective_start_Date AND petEYE.effective_end_Date
+  AND pivEYE.name = 'Amount'
+  AND TRUNC(sysdate) BETWEEN pivEYE.effective_start_date AND pivEYE.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN peevEYE.effective_Start_date AND peevEYE.effective_end_Date
+  AND petEYE.element_name        = 'FD Vision1'
+  AND peevEYE.effective_end_date > TRUNC(sysdate)
+  ),
+  (SELECT peoFSAM.person_id       AS "FSAMID",
+    petFSAM.element_name          AS "FSAMEL",
+    peevFSAM.effective_start_Date AS "FSAMSD",
+    peevFSAM.effective_end_date   AS "FSAMED",
+    pivFSAM.name                  AS "FSAMTP",
+    peevFSAM.screen_entry_value   AS "FSAMVAL"
+  FROM hr.per_all_people_f peoFSAM,
+    hr.per_all_assignments_f matFSAM,
+    hr.PAY_ELEMENT_ENTRIES_F peeFSAM,
+    hr.PAY_ELEMENT_TYPES_F petFSAM,
+    hr.pay_input_values_f pivFSAM,
+    hr.PAY_ELEMENT_ENTRY_VALUES_F peevFSAM
+  WHERE peoFSAM.person_id      = matFSAM.person_id
+  AND petFSAM.element_type_id  = peeFSAM.element_type_id
+  AND peeFSAM.assignment_id    = matFSAM.assignment_id
+  AND petFSAM.element_type_id  = pivFSAM.element_type_id
+  AND pivFSAM.input_value_id   = peevFSAM.input_value_id
+  AND peeFSAM.element_entry_id = peevFSAM.element_entry_id
+  AND TRUNC(sysdate) BETWEEN peoFSAM.effective_start_Date AND peoFSAM.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN matFSAM.effective_start_Date AND matFSAM.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN peeFSAM.effective_start_Date AND peeFSAM.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN petFSAM.effective_start_Date AND petFSAM.effective_end_Date
+  AND pivFSAM.name = 'Amount'
+  AND TRUNC(sysdate) BETWEEN pivFSAM.effective_start_date AND pivFSAM.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN peevFSAM.effective_Start_date AND peevFSAM.effective_end_Date
+  AND petFSAM.element_name        = 'FD FSA Medical1'
+  AND peevFSAM.effective_end_date > TRUNC(sysdate)
+  ),
+  (SELECT peoFSAD.person_id       AS "FSADID",
+    petFSAD.element_name          AS "FSADEL",
+    peevFSAD.effective_start_Date AS "FSADSD",
+    peevFSAD.effective_end_date   AS "FSADED",
+    pivFSAD.name                  AS "FSADTP",
+    peevFSAD.screen_entry_value   AS "FSADVAL"
+  FROM hr.per_all_people_f peoFSAD,
+    hr.per_all_assignments_f matFSAD,
+    hr.PAY_ELEMENT_ENTRIES_F peeFSAD,
+    hr.PAY_ELEMENT_TYPES_F petFSAD,
+    hr.pay_input_values_f pivFSAD,
+    hr.PAY_ELEMENT_ENTRY_VALUES_F peevFSAD
+  WHERE peoFSAD.person_id      = matFSAD.person_id
+  AND petFSAD.element_type_id  = peeFSAD.element_type_id
+  AND peeFSAD.assignment_id    = matFSAD.assignment_id
+  AND petFSAD.element_type_id  = pivFSAD.element_type_id
+  AND pivFSAD.input_value_id   = peevFSAD.input_value_id
+  AND peeFSAD.element_entry_id = peevFSAD.element_entry_id
+  AND TRUNC(sysdate) BETWEEN peoFSAD.effective_start_Date AND peoFSAD.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN matFSAD.effective_start_Date AND matFSAD.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN peeFSAD.effective_start_Date AND peeFSAD.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN petFSAD.effective_start_Date AND petFSAD.effective_end_Date
+  AND pivFSAD.name = 'Amount'
+  AND TRUNC(sysdate) BETWEEN pivFSAD.effective_start_date AND pivFSAD.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN peevFSAD.effective_Start_date AND peevFSAD.effective_end_Date
+  AND petFSAD.element_name        = 'FD FSA DependentCare1'
+  AND peevFSAD.effective_end_date > TRUNC(sysdate)
+  ),
+  (SELECT peoVLEMP.person_id       AS "VLEMPID",
+    petVLEMP.element_name          AS "VLEMPEL",
+    peevVLEMP.effective_start_Date AS "VLEMPSD",
+    peevVLEMP.effective_end_date   AS "VLEMPED",
+    pivVLEMP.name                  AS "VLEMPTP",
+    peevVLEMP.screen_entry_value   AS "VLEMPVAL"
+  FROM hr.per_all_people_f peoVLEMP,
+    hr.per_all_assignments_f matVLEMP,
+    hr.PAY_ELEMENT_ENTRIES_F peeVLEMP,
+    hr.PAY_ELEMENT_TYPES_F petVLEMP,
+    hr.pay_input_values_f pivVLEMP,
+    hr.PAY_ELEMENT_ENTRY_VALUES_F peevVLEMP
+  WHERE peoVLEMP.person_id      = matVLEMP.person_id
+  AND petVLEMP.element_type_id  = peeVLEMP.element_type_id
+  AND peeVLEMP.assignment_id    = matVLEMP.assignment_id
+  AND petVLEMP.element_type_id  = pivVLEMP.element_type_id
+  AND pivVLEMP.input_value_id   = peevVLEMP.input_value_id
+  AND peeVLEMP.element_entry_id = peevVLEMP.element_entry_id
+  AND TRUNC(sysdate) BETWEEN peoVLEMP.effective_start_Date AND peoVLEMP.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN matVLEMP.effective_start_Date AND matVLEMP.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN peeVLEMP.effective_start_Date AND peeVLEMP.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN petVLEMP.effective_start_Date AND petVLEMP.effective_end_Date
+  AND pivVLEMP.name = 'Amount'
+  AND TRUNC(sysdate) BETWEEN pivVLEMP.effective_start_date AND pivVLEMP.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN peevVLEMP.effective_Start_date AND peevVLEMP.effective_end_Date
+  AND petVLEMP.element_name        = 'FD VolLife_Emp1'
+  AND peevVLEMP.effective_end_date > TRUNC(sysdate)
+  ),
+  (SELECT peoVLSP.person_id       AS "VLSPID",
+    petVLSP.element_name          AS "VLSPEL",
+    peevVLSP.effective_start_Date AS "VLSPSD",
+    peevVLSP.effective_end_date   AS "VLSPED",
+    pivVLSP.name                  AS "VLSPTP",
+    peevVLSP.screen_entry_value   AS "VLSPVAL"
+  FROM hr.per_all_people_f peoVLSP,
+    hr.per_all_assignments_f matVLSP,
+    hr.PAY_ELEMENT_ENTRIES_F peeVLSP,
+    hr.PAY_ELEMENT_TYPES_F petVLSP,
+    hr.pay_input_values_f pivVLSP,
+    hr.PAY_ELEMENT_ENTRY_VALUES_F peevVLSP
+  WHERE peoVLSP.person_id      = matVLSP.person_id
+  AND petVLSP.element_type_id  = peeVLSP.element_type_id
+  AND peeVLSP.assignment_id    = matVLSP.assignment_id
+  AND petVLSP.element_type_id  = pivVLSP.element_type_id
+  AND pivVLSP.input_value_id   = peevVLSP.input_value_id
+  AND peeVLSP.element_entry_id = peevVLSP.element_entry_id
+  AND TRUNC(sysdate) BETWEEN peoVLSP.effective_start_Date AND peoVLSP.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN matVLSP.effective_start_Date AND matVLSP.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN peeVLSP.effective_start_Date AND peeVLSP.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN petVLSP.effective_start_Date AND petVLSP.effective_end_Date
+  AND pivVLSP.name = 'Amount'
+  AND TRUNC(sysdate) BETWEEN pivVLSP.effective_start_date AND pivVLSP.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN peevVLSP.effective_Start_date AND peevVLSP.effective_end_Date
+  AND petVLSP.element_name        = 'FD VolLife_Spouse1'
+  AND peevVLSP.effective_end_date > TRUNC(sysdate)
+  ),
+  (SELECT peoVLCH.person_id       AS "VLCHID",
+    petVLCH.element_name          AS "VLCHEL",
+    peevVLCH.effective_start_Date AS "VLCHSD",
+    peevVLCH.effective_end_date   AS "VLCHED",
+    pivVLCH.name                  AS "VLCHTP",
+    peevVLCH.screen_entry_value   AS "VLCHVAL"
+  FROM hr.per_all_people_f peoVLCH,
+    hr.per_all_assignments_f matVLCH,
+    hr.PAY_ELEMENT_ENTRIES_F peeVLCH,
+    hr.PAY_ELEMENT_TYPES_F petVLCH,
+    hr.pay_input_values_f pivVLCH,
+    hr.PAY_ELEMENT_ENTRY_VALUES_F peevVLCH
+  WHERE peoVLCH.person_id      = matVLCH.person_id
+  AND petVLCH.element_type_id  = peeVLCH.element_type_id
+  AND peeVLCH.assignment_id    = matVLCH.assignment_id
+  AND petVLCH.element_type_id  = pivVLCH.element_type_id
+  AND pivVLCH.input_value_id   = peevVLCH.input_value_id
+  AND peeVLCH.element_entry_id = peevVLCH.element_entry_id
+  AND TRUNC(sysdate) BETWEEN peoVLCH.effective_start_Date AND peoVLCH.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN matVLCH.effective_start_Date AND matVLCH.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN peeVLCH.effective_start_Date AND peeVLCH.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN petVLCH.effective_start_Date AND petVLCH.effective_end_Date
+  AND pivVLCH.name = 'Amount'
+  AND TRUNC(sysdate) BETWEEN pivVLCH.effective_start_date AND pivVLCH.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN peevVLCH.effective_Start_date AND peevVLCH.effective_end_Date
+  AND petVLCH.element_name        = 'FD VolLife_Child1'
+  AND peevVLCH.effective_end_date > TRUNC(sysdate)
+  ),
+  (SELECT peoLTD.person_id       AS "LTDID",
+    petLTD.element_name          AS "LTDEL",
+    peevLTD.effective_start_Date AS "LTDSD",
+    peevLTD.effective_end_date   AS "LTDED",
+    pivLTD.name                  AS "LTDTP",
+    peevLTD.screen_entry_value   AS "LTDVAL"
+  FROM hr.per_all_people_f peoLTD,
+    hr.per_all_assignments_f matLTD,
+    hr.PAY_ELEMENT_ENTRIES_F peeLTD,
+    hr.PAY_ELEMENT_TYPES_F petLTD,
+    hr.pay_input_values_f pivLTD,
+    hr.PAY_ELEMENT_ENTRY_VALUES_F peevLTD
+  WHERE peoLTD.person_id      = matLTD.person_id
+  AND petLTD.element_type_id  = peeLTD.element_type_id
+  AND peeLTD.assignment_id    = matLTD.assignment_id
+  AND petLTD.element_type_id  = pivLTD.element_type_id
+  AND pivLTD.input_value_id   = peevLTD.input_value_id
+  AND peeLTD.element_entry_id = peevLTD.element_entry_id
+  AND TRUNC(sysdate) BETWEEN peoLTD.effective_start_Date AND peoLTD.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN matLTD.effective_start_Date AND matLTD.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN peeLTD.effective_start_Date AND peeLTD.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN petLTD.effective_start_Date AND petLTD.effective_end_Date
+  AND pivLTD.name = 'Amount'
+  AND TRUNC(sysdate) BETWEEN pivLTD.effective_start_date AND pivLTD.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN peevLTD.effective_Start_date AND peevLTD.effective_end_Date
+  AND petLTD.element_name        = 'FD LTD1'
+  AND peevLTD.effective_end_date > TRUNC(sysdate)
+  ),
+  (SELECT peoSTD.person_id       AS "STDID",
+    petSTD.element_name          AS "STDEL",
+    peevSTD.effective_start_Date AS "STDSD",
+    peevSTD.effective_end_date   AS "STDED",
+    pivSTD.name                  AS "STDTP",
+    peevSTD.screen_entry_value   AS "STDVAL"
+  FROM hr.per_all_people_f peoSTD,
+    hr.per_all_assignments_f matSTD,
+    hr.PAY_ELEMENT_ENTRIES_F peeSTD,
+    hr.PAY_ELEMENT_TYPES_F petSTD,
+    hr.pay_input_values_f pivSTD,
+    hr.PAY_ELEMENT_ENTRY_VALUES_F peevSTD
+  WHERE peoSTD.person_id      = matSTD.person_id
+  AND petSTD.element_type_id  = peeSTD.element_type_id
+  AND peeSTD.assignment_id    = matSTD.assignment_id
+  AND petSTD.element_type_id  = pivSTD.element_type_id
+  AND pivSTD.input_value_id   = peevSTD.input_value_id
+  AND peeSTD.element_entry_id = peevSTD.element_entry_id
+  AND TRUNC(sysdate) BETWEEN peoSTD.effective_start_Date AND peoSTD.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN matSTD.effective_start_Date AND matSTD.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN peeSTD.effective_start_Date AND peeSTD.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN petSTD.effective_start_Date AND petSTD.effective_end_Date
+  AND pivSTD.name = 'Amount'
+  AND TRUNC(sysdate) BETWEEN pivSTD.effective_start_date AND pivSTD.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN peevSTD.effective_Start_date AND peevSTD.effective_end_Date
+  AND petSTD.element_name        = 'FD STD1'
+  AND peevSTD.effective_end_date > TRUNC(sysdate)
+  ),
+  (SELECT peoFRNG.person_id       AS "FRNGID",
+    petFRNG.element_name          AS "FRNGEL",
+    peevFRNG.effective_start_Date AS "FRNGSD",
+    peevFRNG.effective_end_date   AS "FRNGED",
+    pivFRNG.name                  AS "FRNGTP",
+    peevFRNG.screen_entry_value   AS "FRNGVAL"
+  FROM hr.per_all_people_f peoFRNG,
+    hr.per_all_assignments_f matFRNG,
+    hr.PAY_ELEMENT_ENTRIES_F peeFRNG,
+    hr.PAY_ELEMENT_TYPES_F petFRNG,
+    hr.pay_input_values_f pivFRNG,
+    hr.PAY_ELEMENT_ENTRY_VALUES_F peevFRNG
+  WHERE peoFRNG.person_id      = matFRNG.person_id
+  AND petFRNG.element_type_id  = peeFRNG.element_type_id
+  AND peeFRNG.assignment_id    = matFRNG.assignment_id
+  AND petFRNG.element_type_id  = pivFRNG.element_type_id
+  AND pivFRNG.input_value_id   = peevFRNG.input_value_id
+  AND peeFRNG.element_entry_id = peevFRNG.element_entry_id
+  AND TRUNC(sysdate) BETWEEN peoFRNG.effective_start_Date AND peoFRNG.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN matFRNG.effective_start_Date AND matFRNG.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN peeFRNG.effective_start_Date AND peeFRNG.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN petFRNG.effective_start_Date AND petFRNG.effective_end_Date
+  AND pivFRNG.name = 'Amount'
+  AND TRUNC(sysdate) BETWEEN pivFRNG.effective_start_date AND pivFRNG.effective_end_Date
+  AND TRUNC(sysdate) BETWEEN peevFRNG.effective_Start_date AND peevFRNG.effective_end_Date
+  AND petFRNG.element_name        = 'FD Fringe Select'
+  AND peevFRNG.effective_end_date > TRUNC(sysdate)
+  )
+WHERE TRUNC(sysdate) BETWEEN peo.effective_start_date AND peo.effective_end_date
+AND peo.current_employee_flag = 'Y'
+AND "401ID" (+)               = peo.person_id
+AND "ESPPID" (+)              = peo.person_id
+AND "BCBSID" (+)              = peo.person_id
+AND "METID" (+)               = peo.person_id
+AND "EYEID" (+)               = peo.person_id
+AND "FSAMID" (+)              = peo.person_id
+AND "FSADID" (+)              = peo.person_id
+AND "VLEMPID" (+)             = peo.person_id
+AND "VLSPID" (+)              = peo.person_id
+AND "VLCHID" (+)              = peo.person_id
+AND "LTDID" (+)               = peo.person_id
+AND "STDID" (+)               = peo.person_id
+AND "FRNGID" (+)              = peo.person_id
