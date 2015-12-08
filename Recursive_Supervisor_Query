@@ -1,0 +1,28 @@
+SELECT peo.full_name   AS "Team Member",
+  peo.employee_number  AS "TM EIN",
+  peo2.full_name       AS "Supervisor",
+  peo2.employee_number AS "Sup EIN"
+FROM hr.per_all_people_f peo,
+  hr.per_all_assignments_f mat,
+  hr.per_all_people_f peo2
+WHERE TRUNC(sysdate) BETWEEN peo.effective_start_date AND peo.effective_end_date
+AND TRUNC(sysdate) BETWEEN peo2.effective_start_date AND peo2.effective_end_date
+AND TRUNC(sysdate) BETWEEN mat.effective_start_date AND mat.effective_end_date
+AND peo.person_id             =mat.person_id
+AND mat.SUPERVISOR_ID         = peo2.PERSON_ID
+AND peo.current_employee_flag = 'Y'
+AND mat.primary_flag          = 'Y'
+AND mat.person_ID            IN
+  (SELECT MatA.person_id
+  FROM hr.per_all_assignments_f MatA
+  WHERE MatA.primary_flag         = 'Y'
+    START WITH MatA.supervisor_id =
+    (SELECT DISTINCT(person_id)
+    FROM hr.per_all_people_f
+    WHERE employee_number = :SUPERVISOR_EIN
+    )
+  AND TRUNC(sysdate) BETWEEN MatA.effective_start_date AND MatA.effective_end_date
+    CONNECT BY MatA.supervisor_id = prior MatA.person_id
+  AND TRUNC(sysdate) BETWEEN MatA.effective_start_date AND MatA.effective_end_date
+  )
+ORDER BY peo.FULL_NAME
