@@ -1,0 +1,7 @@
+SELECT j.name "Job",
+  e.jei_information1 "Business Title"
+FROM hr.per_jobs j,
+  hr.per_job_extra_info e
+WHERE e.job_id (+)             = j.job_id
+AND e.jei_information_category = 'Business Title'
+  --and e.jei_information1 = ''
