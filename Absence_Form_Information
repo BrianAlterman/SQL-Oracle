@@ -1,0 +1,27 @@
+-- Pulling absence information (absence form)
+SELECT peo.EMPLOYEE_NUMBER AS "EIN",
+  peo.FULL_NAME            AS "Full Name",
+  paa.DATE_START           AS "Start Date",
+  paa.DATE_END             AS "End Date",
+  paad.NAME                AS "Type of Leave",
+  hrl.MEANING              AS "Sub Type",
+  paa.ABSENCE_HOURS        AS "Hours",
+  paa.creation_date        AS "Keyed On"
+FROM hr.per_all_people_f peo,
+  hr.PER_ABSENCE_ATTENDANCES paa,
+  hr.PER_ABSENCE_ATTENDANCE_TYPES paad,
+  HR.PER_ABS_ATTENDANCE_REASONS paar,
+  APPS.HR_LOOKUPS hrl
+WHERE paa.person_id                 = peo.person_id
+AND paar.ABS_ATTENDANCE_REASON_ID   = paa.ABS_ATTENDANCE_REASON_ID
+AND paad.ABSENCE_ATTENDANCE_TYPE_ID = paa.ABSENCE_ATTENDANCE_TYPE_ID
+AND hrl.LOOKUP_CODE                 = paar.NAME
+AND peo.current_employee_flag       = 'Y'
+AND hrl.LOOKUP_TYPE                IN 'ABSENCE_REASON'
+AND TRUNC(sysdate) BETWEEN peo.EFFECTIVE_START_DATE AND peo.EFFECTIVE_END_DATE
+AND peo.employee_number IN ('662864')
+AND (hrl.meaning LIKE 'Vac%'
+OR hrl.meaning LIKE 'Sic%')
+AND (paa.date_start BETWEEN :Date_Begin AND :Date_End
+OR paa.DATE_END BETWEEN :Date_Begin AND :Date_End)
+ORDER BY paa.date_start
