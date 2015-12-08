@@ -1,0 +1,19 @@
+SELECT papf.employee_Number,
+apps.pay_us_pto_accrual.get_net_accrual 
+    ( paaf.assignment_id ,
+     TO_DATE('22-Nov-2015','DD-MON-YYYY') ,
+     61  ,
+     'PTO',
+     ''
+     )   
+FROM hr.per_all_people_f papf,
+  hr.per_all_assignments_f paaf,
+  hr.hr_all_organization_units haou,
+  hr.hr_locations_all loc
+WHERE papf.person_id     = paaf.person_id
+AND paaf.organization_id = haou.organization_id
+AND paaf.location_id     = loc.location_id
+AND paaf.primary_flag    = 'Y'
+AND paaf.assignment_type ='E'
+AND '22-Nov-2015' BETWEEN papf.effective_start_date AND papf.effective_end_date
+AND '22-Nov-2015' BETWEEN paaf.effective_start_date AND paaf.effective_end_date
