@@ -1,0 +1,46 @@
+SELECT owner,
+  table_name,
+  tablespace_name,
+  logging,
+  num_rows,
+  blocks,
+  empty_blocks,
+  avg_row_len average_row_length,
+  cache,
+  last_analyzed date_last_analyzed,
+  CASE
+    WHEN la > 2
+    THEN TO_CHAR(la,'99,999.9')
+      || ' days ago'
+    WHEN (la        *1440) > 180
+    THEN TO_CHAR((la*24),'99,999.9')
+      || ' hours ago'
+    ELSE TRUNC(la*1440)
+      || ' minutes ago'
+  END last_analyzed,
+  partitioned,
+  iot_type,
+  owner sdev_link_owner,
+  table_name sdev_link_name,
+  'TABLE' sdev_link_type
+FROM
+  (SELECT owner,
+    NVL(iot_name,table_name) table_name,
+    tablespace_name,
+    logging,
+    num_rows,
+    blocks,
+    empty_blocks,
+    avg_row_len,
+    cache,
+    last_analyzed,
+    (sysdate-last_analyzed) la,
+    partitioned,
+    iot_type
+  FROM all_tables
+  WHERE (:OWNER                                 IS NULL
+  OR instr(owner,upper(:OWNER))                  > 0)
+  AND (:TABLE_NAME                              IS NULL
+  OR instr(upper(table_name),upper(:TABLE_NAME)) > 0)
+  )
+ORDER BY 1,2
