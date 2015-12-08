@@ -1,0 +1,113 @@
+SELECT ppf.employee_number,
+      substr(ppf.first_name,1,50)  first_name,    
+      substr(ppf.last_name,1,50)   last_name,      
+      substr(ppf.suffix,1,3)   suffix,        
+      SUBSTR(ppf.middle_names,1,1) init,
+      pea.segment1,                                  
+      pea.segment3 account_number, 
+      pea.segment4 routing_number, 
+      pea.segment5,
+      ppm.effective_start_date,
+      ppm.effective_end_date
+FROM pay_personal_payment_methods_f ppm,
+      pay_external_accounts          pea,
+      pay_org_payment_methods_f      pom,
+      per_all_assignments_f          paf,
+      per_all_people_f               ppf,
+      per_addresses                  pa,
+      per_periods_of_service         ppos
+WHERE 
+     (ppm.attribute2 NOT IN ('01','02')  
+      OR ppm.attribute2 is null)
+AND ppm.external_account_id is not null
+AND ppm.effective_end_date = (Select max(effective_end_date)
+                                 From pay_personal_payment_methods_f ppm1
+                                Where ppm1.assignment_id = ppm.assignment_id
+                          AND sysdate BETWEEN ppm1.effective_start_date 
+                          AND ppm1.effective_end_date)  
+  
+ AND pea.external_account_id = ppm.external_account_id
+AND pom.org_payment_method_id = ppm.org_payment_method_id
+AND (pom.org_payment_method_name = 'Store Direct Deposit'
+      OR pom.org_payment_method_name = 'Corporate Direct Deposit')       
+ AND pom.effective_end_date = (Select max(effective_end_date)
+                                 From pay_org_payment_methods_f pom1
+                                Where pom1.org_payment_method_id = pom.org_payment_method_id)
+AND paf.assignment_id = ppm.assignment_id
+AND paf.assignment_type = 'E'
+AND paf.effective_end_date = (Select max(effective_end_date)
+                                 From per_all_assignments_f paf1
+                                Where paf1.person_id = paf.person_id
+                                  And assignment_type = 'E')
+  AND ppf.person_id = paf.person_id
+  AND ppf.effective_end_date = (Select max(effective_end_date)
+                                  From per_all_people_f ppf1
+                                 Where ppf1.person_id = ppf.person_id)
+  AND pa.person_id = paf.person_id
+  AND pa.date_to is null
+  AND pa.primary_flag = 'Y'
+  AND (ppos.actual_termination_date IS NULL
+       OR ppos.final_process_date > SYSDATE)                            
+  AND ppos.person_id = paf.person_id
+  AND paf.period_of_service_id = ppos.period_of_service_id
+  AND mod(10-mod (to_number(substrb(pea.segment4,1,1))*3 +  
+to_number(substrb(pea.segment4,2,1))*7 +
+to_number(substrb(pea.segment4,3,1))*1 +
+to_number(substrb(pea.segment4,4,1))*3 +
+to_number(substrb(pea.segment4,5,1))*7 +
+to_number(substrb(pea.segment4,6,1))*1 +
+to_number(substrb(pea.segment4,7,1))*3 +
+to_number(substrb(pea.segment4,8,1))*7, 10), 10) <> to_number(substrb(pea.segment4,9,1))
+union
+SELECT ppf.employee_number,
+      substr(ppf.first_name,1,50)  first_name,   
+      substr(ppf.last_name,1,50)   last_name,     
+      substr(ppf.suffix,1,3)   suffix,       
+      SUBSTR(ppf.middle_names,1,1) init,
+      pea.segment1,                                  
+      pea.segment3 account_number, 
+      pea.segment4 routing_number, 
+      pea.segment5,
+      ppm.effective_start_date,
+      ppm.effective_end_date
+FROM pay_personal_payment_methods_f ppm,
+      pay_external_accounts          pea,
+      pay_org_payment_methods_f      pom,
+      per_all_assignments_f          paf,
+      per_all_people_f               ppf,
+      per_addresses                  pa,
+      per_periods_of_service         ppos
+WHERE 
+     (ppm.attribute2 NOT IN ('01','02')  
+      OR ppm.attribute2 is null)
+AND ppm.external_account_id is not null
+AND ppm.effective_end_date = (Select max(effective_end_date)
+                                 From pay_personal_payment_methods_f ppm1
+                                Where ppm1.assignment_id = ppm.assignment_id
+                          AND sysdate BETWEEN ppm1.effective_start_date 
+                          AND ppm1.effective_end_date)  
+ AND pea.external_account_id = ppm.external_account_id
+AND pom.org_payment_method_id = ppm.org_payment_method_id
+AND (pom.org_payment_method_name = 'Store Direct Deposit'
+      OR pom.org_payment_method_name = 'Corporate Direct Deposit')       
+ AND pom.effective_end_date = (Select max(effective_end_date)
+                                 From pay_org_payment_methods_f pom1
+                                Where pom1.org_payment_method_id = pom.org_payment_method_id)
+AND paf.assignment_id = ppm.assignment_id
+AND paf.assignment_type = 'E'
+AND paf.effective_end_date = (Select max(effective_end_date)
+                                 From per_all_assignments_f paf1
+                                Where paf1.person_id = paf.person_id
+                                  And assignment_type = 'E')
+  AND ppf.person_id = paf.person_id
+  AND ppf.effective_end_date = (Select max(effective_end_date)
+                                  From per_all_people_f ppf1
+                                 Where ppf1.person_id = ppf.person_id)
+  AND pa.person_id = paf.person_id
+  AND pa.date_to is null
+  AND pa.primary_flag = 'Y'
+  AND (ppos.actual_termination_date IS NULL
+       OR ppos.final_process_date > SYSDATE)                            
+  AND ppos.person_id = paf.person_id
+  AND paf.period_of_service_id = ppos.period_of_service_id
+  and (pea.SEGMENT4 like '00000%' or pea.SEGMENT4 like '5%')
