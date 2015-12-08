@@ -1,0 +1,24 @@
+SELECT org.name  AS "Organization",
+  org.attribute1 AS "GRE Org ID",
+  org.type,
+  "GRE",
+  "Work Schedule"
+FROM HR.hr_all_organization_units org,
+  (SELECT name               AS "GRE",
+    TO_CHAR(organization_id) AS "ORGID"
+  FROM HR.hr_all_organization_units orga
+  ),
+  (SELECT org.name        AS "ORGI",
+    orgi.org_information2 AS "Work Schedule"
+  FROM HR.hr_all_organization_units org,
+    HR.hr_organization_information orgi
+  WHERE org.type             IS NOT NULL
+  AND org.organization_id     = orgi.organization_id
+  AND org.type NOT           IN ('VENDOR','COST CENTER')
+  AND org_information_context = 'Work Schedule'
+  )
+WHERE org.attribute1 = "ORGID" (+)
+AND org.type        IS NOT NULL
+AND org.type NOT    IN ('VENDOR','COST CENTER')
+AND org.name         = "ORGI" (+)
+AND org.name LIKE '98%'
