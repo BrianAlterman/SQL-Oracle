@@ -1,0 +1,15 @@
+SELECT peo.employee_number,
+  peo.full_name,
+  floor(sysdate                               - per.date_start)                                     AS "Days",
+  floor(months_between(sysdate,per.date_start)/12)                                                  AS "Years",
+  Floor(months_between(sysdate,per.date_start)-12*TRUNC(months_between(sysdate,per.date_start)/12)) AS "Months"
+FROM hr.per_all_people_f peo,
+  hr.per_periods_of_service per
+WHERE per.person_id = peo.person_id
+AND TRUNC(sysdate) BETWEEN peo.effective_start_date AND peo.effective_end_date
+AND peo.employee_number = '610138'
+AND per.date_start      =
+  (SELECT MAX(per2.date_start)
+  FROM hr.per_periods_of_service per2
+  WHERE per2.person_id = peo.person_id
+  )
