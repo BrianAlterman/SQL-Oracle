@@ -1,0 +1,13 @@
+SELECT DISTINCT(t1.organization_id_child) AS "MAT",
+  org.name ,
+  org.date_to,
+  t1.organization_id_parent AS "PARENT",
+  org2.name,
+  org2.date_to
+FROM HR.per_org_structure_elements t1,
+  hr.hr_all_organization_units org,
+  hr.hr_all_organization_units org2
+WHERE org.organization_id = t1.organization_id_child
+AND org2.organization_id  = t1.organization_id_parent
+AND org2.date_to         IS NOT NULL
+AND org.date_to          IS NULL
