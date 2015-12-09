@@ -1,0 +1,19 @@
+SELECT  /*+ INDEX (a pay_us_city_names_fk1) */
+         c.state_abbrev    , c.state_code,
+         a.city_name       , a.city_code ,
+         z.zip_start       , z.zip_end   ,
+         b.county_name     , b.county_code,
+         UPPER(b.county_name) county_name2,        
+         UPPER(a.city_name) city_name2             
+    FROM pay_us_city_names a
+         , pay_us_counties b
+         , pay_us_states c
+         , pay_us_zip_codes z
+   WHERE a.state_code  = c.state_code
+     AND a.county_code = b.county_code
+     AND b.state_code  = c.state_code
+     AND a.city_code   = z.city_code
+     AND a.state_code  = z.state_code
+     AND a.county_code = z.county_code
+     and a.city_name = 'Elrod'
+     ORDER BY z.zip_start desc
