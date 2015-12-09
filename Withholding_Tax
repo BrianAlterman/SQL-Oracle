@@ -1,0 +1,62 @@
+SELECT DISTINCT peo.employee_number AS "EID",
+  peo.full_name                     AS "Full Name",
+  'State'                           AS "Tax Type",
+  sttax.effective_start_date        AS "Tax Start",
+  sttax.sit_additional_tax          AS "AddlTax",
+  loc.LOCATION_CODE                 AS "Location",
+  org.name                          AS "Organization",
+  jobs.name                         AS "Job Title"
+FROM hr.per_all_people_f peo,
+  hr.per_all_assignments_f mat,
+  hr.hr_locations_all loc,
+  hr.pay_all_payrolls_f pay,
+  hr.HR_ALL_ORGANIZATION_UNITS org,
+  hr.per_jobs jobs,
+  hr.PAY_US_EMP_STATE_TAX_RULES_F sttax,
+  hr.pay_us_states pus
+WHERE TRUNC(sysdate) BETWEEN peo.effective_start_date AND peo.effective_end_date
+AND TRUNC(sysdate) BETWEEN mat.effective_start_date AND mat.effective_end_date
+AND (TRUNC(sysdate) BETWEEN sttax.effective_start_date AND sttax.effective_end_date
+OR sttax.effective_start_date > TRUNC(sysdate))
+AND peo.CURRENT_EMPLOYEE_FLAG = 'Y'
+AND loc.LOCATION_ID           = mat.LOCATION_ID
+AND peo.person_id             = mat.person_id
+AND mat.organization_id       = org.organization_id
+AND mat.job_id                = jobs.job_id
+AND mat.assignment_id         = sttax.assignment_id
+AND sttax.STATE_CODE          = pus.state_code
+AND pus.STATE_ABBREV          = loc.REGION_2
+AND sttax.sit_additional_tax <> '0'
+AND pay.payroll_id            = mat.payroll_id
+AND pay.payroll_name          = 'Store Bi-Weekly 1a'
+UNION
+SELECT DISTINCT peo.employee_number AS "EID",
+  peo.full_name                     AS "Full Name",
+  'Federal'                         AS "Tax Type",
+  fdtax.effective_start_date        AS "Fed Tax Start",
+  fdtax.fit_additional_tax          AS "Addl Fed Tax",
+  loc.LOCATION_CODE                 AS "Location",
+  org.name                          AS "Organization",
+  jobs.name                         AS "Job Title"
+FROM hr.per_all_people_f peo,
+  hr.per_all_assignments_f mat,
+  hr.hr_locations_all loc,
+  hr.pay_all_payrolls_f pay,
+  hr.HR_ALL_ORGANIZATION_UNITS org,
+  hr.per_jobs jobs,
+  hr.pay_us_states pus,
+  hr.PAY_US_EMP_FED_TAX_RULES_F fdtax
+WHERE TRUNC(sysdate) BETWEEN peo.effective_start_date AND peo.effective_end_date
+AND TRUNC(sysdate) BETWEEN mat.effective_start_date AND mat.effective_end_date
+AND (TRUNC(sysdate) BETWEEN fdtax.effective_start_date AND fdtax.effective_end_date
+OR fdtax.effective_start_date > TRUNC(sysdate))
+AND peo.CURRENT_EMPLOYEE_FLAG = 'Y'
+AND loc.LOCATION_ID           = mat.LOCATION_ID
+AND mat.assignment_id         = fdtax.ASSIGNMENT_ID
+AND peo.person_id             = mat.person_id
+AND mat.organization_id       = org.organization_id
+AND mat.job_id                = jobs.job_id
+AND pus.STATE_ABBREV          = loc.REGION_2
+AND fdtax.fit_additional_tax <> '0'
+AND pay.payroll_id            = mat.payroll_id
+AND pay.payroll_name          = 'Store Bi-Weekly 1a'
