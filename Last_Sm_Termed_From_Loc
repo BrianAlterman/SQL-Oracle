@@ -1,0 +1,57 @@
+Select peo2.employee_number as "EID",
+       peo2.full_name as "Full Name",
+       --"Store Number",
+       loc2.attribute3,
+       --"Term Date",
+       per2.actual_termination_date,
+       jobs2.name
+From
+(select "Store Number" ,
+       max("Term Date") as "Term Date"
+from (select peo.employee_number as "EID",
+             peo.full_name as "Full Name",
+             loc.attribute3 as "Store Number",
+             jobs.name as "Job",
+             per.actual_termination_date as "Term Date"
+      from   hr.per_all_people_f peo,
+             hr.per_all_assignments_f mat,
+             hr.per_periods_of_service per,
+             hr.hr_locations_all loc,
+             hr.hr_all_organization_units org,
+             hr.per_jobs jobs
+      --where  peo.current_employee_flag is null
+      where  current_date between peo.effective_start_date and peo.effective_end_date
+      and    per.actual_termination_date between mat.effective_start_date and mat.effective_end_date
+      and    peo.person_id = mat.person_id
+      and    mat.period_of_service_id = per.period_of_service_id
+      and    mat.location_id = loc.location_id
+      and    jobs.job_id = mat.job_id
+      and    org.organization_id = mat.organization_id
+      and    per.actual_termination_date = (select max(per2.actual_termination_date)
+                                            from   hr.per_periods_of_service per2
+                                            where  per2.person_id = peo.person_id)
+      and    (jobs.name = 'Store Manager.1.98.200'
+              or (org.name like 'Modified D%'  
+                  and jobs.job_information3 = 'EX'))
+      and    loc.attribute3 in ('00012','00030','00040')--158
+     )
+--where "Store Number" = '01793'
+group by "Store Number"),
+hr.hr_locations_all loc2,
+hr.per_all_assignments_f mat2,
+hr.per_all_people_f peo2,
+hr.per_periods_of_service per2,
+hr.per_jobs jobs2,
+hr.hr_all_organization_units org2
+Where "Store Number" = loc2.attribute3
+and   loc2.location_id = mat2.location_id
+and   mat2.person_id = peo2.person_id
+and   mat2.organization_id = org2.organization_id
+and   mat2.job_id = jobs2.job_id
+and   "Term Date" = per2.actual_termination_date
+and   mat2.period_of_service_id = per2.period_of_service_id
+and   current_date between peo2.effective_start_date and peo2.effective_end_date
+and   "Term Date" between mat2.effective_start_date and mat2.effective_end_date
+and    (jobs2.name = 'Store Manager.1.98.200'
+              or (org2.name like 'Modified D%'  
+                  and jobs2.job_information3 = 'EX'))
