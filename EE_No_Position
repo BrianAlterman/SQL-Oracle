@@ -1,0 +1,38 @@
+SELECT *
+FROM
+  (SELECT peo.employee_number AS "EID",
+    peo.full_name             AS "Full Name",
+    org.name                  AS "Organization",
+    loc.location_code         AS "Location",
+    jobs.name                 AS "Job Name",
+    pos.name                  AS "Position",
+    mat.ass_attribute2        AS "Business Title",
+    mat.effective_start_date            AS "Assignment Start"
+  FROM hr.per_all_people_f peo,
+    hr.per_all_assignments_f mat,
+    hr.hr_all_organization_units org,
+    hr.per_jobs jobs,
+    hr.hr_locations_all loc,
+    hr.hr_all_positions_f pos,
+    hr.per_periods_of_service per
+  WHERE TRUNC(sysdate) BETWEEN peo.effective_start_date AND peo.effective_end_date
+  AND TRUNC(sysdate) BETWEEN mat.effective_start_date AND mat.effective_end_date
+  AND (TRUNC(sysdate) BETWEEN pos.effective_start_date AND pos.effective_end_date
+  OR pos.effective_start_date  IS NULL)
+  AND peo.person_id             = mat.person_id
+  AND per.person_id             = peo.person_id
+  AND mat.organization_id       = org.organization_id
+  AND loc.location_id           = mat.location_id
+  AND mat.job_id                = jobs.job_id
+  AND peo.current_employee_flag = 'Y'
+  AND mat.primary_flag          = 'Y'
+  AND per.date_start            =
+    (SELECT MAX(per2.date_start)
+    FROM hr.per_periods_of_service per2
+    WHERE per2.person_id = peo.person_id
+    )
+  AND peo.employee_number NOT IN ('294533', '361116', '28369', '763896' ,'26756')
+  AND mat.position_id          = pos.position_id (+)
+  AND org.type                IN ('STORE', 'DISTRICT', 'REGION', 'GROUP')
+  )
+WHERE "Position" IS NULL
