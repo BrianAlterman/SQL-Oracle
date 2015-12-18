@@ -1,0 +1,51 @@
+SELECT distinct(sub.name) "Child Position (POS)",
+  org.name AS "Child Org (POS)",
+  parent.name "Parent Position (POS)",
+  org2.name    AS "Parent Org (POS)",
+  "PARENT_ORG" AS "Parent Org (Org Hier)",
+  CASE
+    WHEN org2.name <> "PARENT_ORG"
+    THEN 'ERROR'
+    ELSE 'CORRECT'
+  END AS "Validation"
+FROM hr.PER_pos_STRUCTURE_ELEMENTS pose,
+  hr.PER_pos_STRUCTURE_VERSIONS posv,
+  HR.PER_position_STRUCTURES pos,
+  hr.hr_all_organization_units org,
+  hr.hr_all_organization_units org2,
+  hr.hr_all_positions_f parent,
+  hr.hr_all_positions_f sub,
+  (SELECT houchild.name AS CHILD_ORG,
+    houparent.name      AS PARENT_ORG
+    --pos.name
+  FROM hr.PER_ORG_STRUCTURE_ELEMENTS pose,
+    hr.hr_all_organization_units houchild,
+    hr.hr_all_organization_units houparent,
+    hr.PER_ORG_STRUCTURE_VERSIONS posv,
+    HR.PER_ORGANIZATION_STRUCTURES pos
+  WHERE pose.ORGANIZATION_ID_CHILD   = houchild.ORGANIZATION_ID
+  AND pose.ORGANIZATION_ID_PARENT    = houparent.ORGANIZATION_ID
+  AND pose.ORG_STRUCTURE_VERSION_ID  = posv.ORG_STRUCTURE_VERSION_ID
+  AND posv.ORGANIZATION_STRUCTURE_ID = pos.ORGANIZATION_STRUCTURE_ID
+  AND pos.name                      IN ('FDS Primary')
+  AND houchild.name LIKE '98%'
+  AND houchild.date_to IS NULL
+  ORDER BY houparent.name,
+    houchild.name
+  )
+WHERE pose.pos_STRUCTURE_VERSION_ID = posv.pos_STRUCTURE_VERSION_ID
+AND posv.position_STRUCTURE_ID      = pos.position_STRUCTURE_ID
+AND pos.name                       IN ('FD Primary Position') --,'hr.hr_all_positions_f f
+AND parent.position_id              = pose.parent_position_id
+AND sub.position_id                 = pose.subordinate_position_id
+AND sub.organization_id             = org.organization_id
+AND parent.organization_id          = org2.organization_id
+AND sub.name LIKE 'Store Man%'
+AND "CHILD_ORG" = org.name
+and org2.name <> "PARENT_ORG"
+and trunc(sysdate) between sub.effective_start_date and sub.effective_end_date
+and sub.status is null
+--and "PARENT_ORG" <> '7290999 District 999'
+--and "PARENT_ORG" <> '7290997 District 997'
+ORDER BY parent.name ,
+  sub.name
