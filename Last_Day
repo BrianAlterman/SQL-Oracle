@@ -1,0 +1,5 @@
+SELECT Last_Day(ADD_MONTHS(trunc(sysdate),-1)) AS LASTd from DUAL; 
+
+SELECT to_char(trunc(sysdate,'MON'),'DAY') from dual;
+
+SELECT TRUNC(ADD_MONTHS(SYSDATE, +1),'MM') , LAST_DAY(ADD_MONTHS(trunc(SYSDATE),+1)) FROM dual;
