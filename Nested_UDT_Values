@@ -1,0 +1,161 @@
+SELECT w.user_table_name AS "TableName",
+  W.USER_ROW_TITLE ,
+  w3.display_sequence AS "Display Seq",
+  w4.value "Job Title",
+  "Exact2" AS"State" ,
+  "Exact3" AS"County" ,
+  "Exact4" AS"City" ,
+  "Exact"  AS "Cap (hours)",
+  "Exact5" AS "Hours/Accrual",
+  "Exact7" AS "Set Rate (hours/week)",
+  "Exact6" AS "Return in Window (Days)",
+  "Exact8" AS "Time Before Accrual (Days)"
+FROM hr.pay_user_tables w,
+  hr.pay_user_columns w2,
+  hr.pay_user_rows_f w3,
+  hr.pay_user_column_instances_f w4,
+  (SELECT w4.value      AS "Exact",
+    w3.display_sequence AS "DispSeq",
+    w.user_table_name   AS "UserTable"
+  FROM hr.pay_user_tables w,
+    hr.pay_user_columns w2,
+    hr.pay_user_rows_f w3,
+    hr.pay_user_column_instances_f w4
+  WHERE w.user_table_id    = w2.user_table_id
+  AND w.user_table_id      = w3.user_table_id
+  AND w4.user_row_id       = w3.user_row_id
+  AND w4.user_column_id    = w2.user_column_id
+  AND w.user_table_name    = 'FD_US_HR_STORE_SICK_PTO_RATES'
+  AND w2.user_column_name IN 'Cap (hours)'
+  AND TRUNC(sysdate) BETWEEN w3.effective_start_date AND w3.effective_end_date
+  AND TRUNC(sysdate) BETWEEN w4.effective_start_date AND w4.effective_end_date
+  ),
+  (SELECT w4.value      AS "Exact2",
+    w3.display_sequence AS "DispSeq2",
+    w.user_table_name   AS "UserTable2"
+  FROM hr.pay_user_tables w,
+    hr.pay_user_columns w2,
+    hr.pay_user_rows_f w3,
+    hr.pay_user_column_instances_f w4
+  WHERE w.user_table_id    = w2.user_table_id
+  AND w.user_table_id      = w3.user_table_id
+  AND w4.user_row_id       = w3.user_row_id
+  AND w4.user_column_id    = w2.user_column_id
+  AND w.user_table_name    = 'FD_US_HR_STORE_SICK_PTO_RATES'
+  AND w2.user_column_name IN 'State'
+  AND TRUNC(sysdate) BETWEEN w3.effective_start_date AND w3.effective_end_date
+  AND TRUNC(sysdate) BETWEEN w4.effective_start_date AND w4.effective_end_date
+  ),
+  (SELECT w4.value      AS "Exact3",
+    w3.display_sequence AS "DispSeq3",
+    w.user_table_name   AS "UserTable3"
+  FROM hr.pay_user_tables w,
+    hr.pay_user_columns w2,
+    hr.pay_user_rows_f w3,
+    hr.pay_user_column_instances_f w4
+  WHERE w.user_table_id    = w2.user_table_id
+  AND w.user_table_id      = w3.user_table_id
+  AND w4.user_row_id       = w3.user_row_id
+  AND w4.user_column_id    = w2.user_column_id
+  AND w.user_table_name    = 'FD_US_HR_STORE_SICK_PTO_RATES'
+  AND w2.user_column_name IN 'County'
+  AND TRUNC(sysdate) BETWEEN w3.effective_start_date AND w3.effective_end_date
+  AND TRUNC(sysdate) BETWEEN w4.effective_start_date AND w4.effective_end_date
+  ),
+  (SELECT w4.value      AS "Exact4",
+    w3.display_sequence AS "DispSeq4",
+    w.user_table_name   AS "UserTable4"
+  FROM hr.pay_user_tables w,
+    hr.pay_user_columns w2,
+    hr.pay_user_rows_f w3,
+    hr.pay_user_column_instances_f w4
+  WHERE w.user_table_id    = w2.user_table_id
+  AND w.user_table_id      = w3.user_table_id
+  AND w4.user_row_id       = w3.user_row_id
+  AND w4.user_column_id    = w2.user_column_id
+  AND w.user_table_name    = 'FD_US_HR_STORE_SICK_PTO_RATES'
+  AND w2.user_column_name IN 'City'
+  AND TRUNC(sysdate) BETWEEN w3.effective_start_date AND w3.effective_end_date
+  AND TRUNC(sysdate) BETWEEN w4.effective_start_date AND w4.effective_end_date
+  ),
+  (SELECT w4.value      AS "Exact5",
+    w3.display_sequence AS "DispSeq5",
+    w.user_table_name   AS "UserTable5"
+  FROM hr.pay_user_tables w,
+    hr.pay_user_columns w2,
+    hr.pay_user_rows_f w3,
+    hr.pay_user_column_instances_f w4
+  WHERE w.user_table_id    = w2.user_table_id
+  AND w.user_table_id      = w3.user_table_id
+  AND w4.user_row_id       = w3.user_row_id
+  AND w4.user_column_id    = w2.user_column_id
+  AND w.user_table_name    = 'FD_US_HR_STORE_SICK_PTO_RATES'
+  AND w2.user_column_name IN 'Hours/Accrual'
+  AND TRUNC(sysdate) BETWEEN w3.effective_start_date AND w3.effective_end_date
+  AND TRUNC(sysdate) BETWEEN w4.effective_start_date AND w4.effective_end_date
+  ),
+  (SELECT w4.value      AS "Exact6",
+    w3.display_sequence AS "DispSeq6",
+    w.user_table_name   AS "UserTable6"
+  FROM hr.pay_user_tables w,
+    hr.pay_user_columns w2,
+    hr.pay_user_rows_f w3,
+    hr.pay_user_column_instances_f w4
+  WHERE w.user_table_id    = w2.user_table_id
+  AND w.user_table_id      = w3.user_table_id
+  AND w4.user_row_id       = w3.user_row_id
+  AND w4.user_column_id    = w2.user_column_id
+  AND w.user_table_name    = 'FD_US_HR_STORE_SICK_PTO_RATES'
+  AND w2.user_column_name IN 'Return in Window (Days)'
+  AND TRUNC(sysdate) BETWEEN w3.effective_start_date AND w3.effective_end_date
+  AND TRUNC(sysdate) BETWEEN w4.effective_start_date AND w4.effective_end_date
+  ),
+  (SELECT w4.value      AS "Exact7",
+    w3.display_sequence AS "DispSeq7",
+    w.user_table_name   AS "UserTable7"
+  FROM hr.pay_user_tables w,
+    hr.pay_user_columns w2,
+    hr.pay_user_rows_f w3,
+    hr.pay_user_column_instances_f w4
+  WHERE w.user_table_id    = w2.user_table_id
+  AND w.user_table_id      = w3.user_table_id
+  AND w4.user_row_id       = w3.user_row_id
+  AND w4.user_column_id    = w2.user_column_id
+  AND w.user_table_name    = 'FD_US_HR_STORE_SICK_PTO_RATES'
+  AND w2.user_column_name IN 'Set Rate (hours/week)'
+  AND TRUNC(sysdate) BETWEEN w3.effective_start_date AND w3.effective_end_date
+  AND TRUNC(sysdate) BETWEEN w4.effective_start_date AND w4.effective_end_date
+  ),
+  (SELECT w4.value      AS "Exact8",
+    w3.display_sequence AS "DispSeq8",
+    w.user_table_name   AS "UserTable8"
+  FROM hr.pay_user_tables w,
+    hr.pay_user_columns w2,
+    hr.pay_user_rows_f w3,
+    hr.pay_user_column_instances_f w4
+  WHERE w.user_table_id    = w2.user_table_id
+  AND w.user_table_id      = w3.user_table_id
+  AND w4.user_row_id       = w3.user_row_id
+  AND w4.user_column_id    = w2.user_column_id
+  AND w.user_table_name    = 'FD_US_HR_STORE_SICK_PTO_RATES'
+  AND w2.user_column_name IN 'Time Before Accrual (Days)'
+  AND TRUNC(sysdate) BETWEEN w3.effective_start_date AND w3.effective_end_date
+  AND TRUNC(sysdate) BETWEEN w4.effective_start_date AND w4.effective_end_date
+  )
+WHERE w.user_table_id   = w2.user_table_id
+AND w.user_table_id     = w3.user_table_id
+AND w4.user_row_id      = w3.user_row_id
+AND w4.user_column_id   = w2.user_column_id
+AND w.user_table_name   = "UserTable"
+AND w2.user_column_name = 'Job Title'
+AND "DispSeq"           = w3.display_sequence
+AND "DispSeq2"          = w3.display_sequence
+AND "DispSeq3"          = w3.display_sequence
+AND "DispSeq4"          = w3.display_sequence
+AND "DispSeq5"          = w3.display_sequence
+AND "DispSeq6"          = w3.display_sequence
+AND "DispSeq7"          = w3.display_sequence
+AND "DispSeq8"          = w3.display_sequence
+AND TRUNC(sysdate) BETWEEN w3.effective_start_date AND w3.effective_end_date
+AND TRUNC(sysdate) BETWEEN w4.effective_start_date AND w4.effective_end_date
+ORDER BY w3.display_sequence
