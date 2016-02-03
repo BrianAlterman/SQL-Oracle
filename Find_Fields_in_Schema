@@ -1,0 +1,4 @@
+SELECT *
+FROM ALL_TAB_COLUMNS
+WHERE COLUMN_NAME = 'PERSON_ID' --Field name
+AND owner         = 'HR'        --Schema
