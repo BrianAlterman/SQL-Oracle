@@ -1,0 +1,46 @@
+SELECT EMPLOYEE_NUMBER,
+  FULL_NAME,
+  SUM(Gross) Gross,
+  SUM(Hours) Hours,
+  Location
+FROM
+  (SELECT EMPLOYEE_NUMBER,
+    FULL_NAME,
+    CASE
+      WHEN bal.BALANCE_NAME = 'FD Final Vacation'
+      THEN kb2.BALANCE_VALUE
+    END Gross,
+    CASE
+      WHEN bal.BALANCE_NAME = 'FD Final Vacation Hours'
+      THEN kb2.BALANCE_VALUE
+    END Hours,
+    CASE
+      WHEN loc.ATTRIBUTE3 IS NULL
+      THEN
+        CASE
+          WHEN loc.ATTRIBUTE5 IS NULL
+          THEN loc.LOCATION_CODE
+          ELSE loc.ATTRIBUTE5
+        END
+      ELSE loc.ATTRIBUTE3
+    END Location
+  FROM hr.PER_ALL_PEOPLE_F a,
+    hr.PER_ALL_ASSIGNMENTS_F b,
+    HR_LOCATIONS_ALL loc,
+    KBACE.XKB_BALANCES kb1,
+    KBACE.XKB_BALANCE_DETAILS kb2,
+    PAY_BALANCE_TYPES bal
+  WHERE a.PERSON_ID            = b.PERSON_ID
+  AND b.LOCATION_ID            = loc.LOCATION_ID
+  AND b.ASSIGNMENT_ID          = kb1.ASSIGNMENT_ID
+  AND bal.BALANCE_NAME        IN ('FD Final Vacation','FD Final Vacation Hours')
+  AND kb1.ASSIGNMENT_ACTION_ID = kb2.ASSIGNMENT_ACTION_ID
+  AND kb2.BALANCE_TYPE_ID      = bal.BALANCE_TYPE_ID
+  AND employee_number          = '885286'
+  AND kb1.effective_date BETWEEN '1-jan-2015' AND '31-dec-2015'
+  AND kb1.date_earned BETWEEN a.EFFECTIVE_START_DATE AND a.EFFECTIVE_END_DATE
+  AND kb1.date_Earned BETWEEN b.EFFECTIVE_START_DATE AND b.EFFECTIVE_END_DATE
+  )
+GROUP BY EMPLOYEE_NUMBER,
+  FULL_NAME,
+  Location
