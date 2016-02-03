@@ -1,0 +1,21 @@
+SELECT pbh.batch_name AS "Batch Name",
+  peo.employee_number AS "EIN",
+  peo.full_name       AS "Full Name",
+  pbl.value_3         AS "Carryover",
+  pbl.effective_date  AS "Effective_date",
+  pbl.element_name    AS "Element Name"
+FROM hr.pay_batch_headers pbh,
+  hr.pay_batch_lines pbl,
+  hr.per_all_people_f peo,
+  hr.per_all_assignments_f mat
+WHERE pbl.batch_id        = pbh.batch_id
+AND peo.person_id         = mat.person_id
+AND mat.assignment_number = pbl.assignment_number
+AND TRUNC(sysdate) BETWEEN peo.effective_start_date AND peo.effective_end_date
+AND mat.effective_end_date =
+  (SELECT MAX(mata.effective_end_date)
+  FROM hr.per_all_assignments_f mata
+  WHERE mata.person_id = mat.person_id
+  )
+AND mat.primary_flag = 'Y'
+AND pbh.batch_name  IN ('FinalVacationDE-02-NOV-15')
