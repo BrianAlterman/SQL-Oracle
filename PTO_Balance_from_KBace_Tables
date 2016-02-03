@@ -1,0 +1,39 @@
+SELECT peo.employee_number AS "EIN",
+  peo.full_name            AS "Full Name",
+  org.name                 AS "Organization",
+  loc.location_code        AS "Location",
+  loc.region_2             AS "State",
+  jobs.name                AS "Job Title",
+  mat.ass_attribute2       AS "Business Title",
+  pbt.balance_name         AS "Balance",
+  SUM(kbd.BALANCE_VALUE)   AS "Hours"
+FROM hr.per_all_assignments_f mat,
+  kbace.xkb_balances kbb,
+  kbace.xkb_balance_details kbd,
+  hr.per_all_people_f peo,
+  hr.pay_balance_types pbt,
+  hr.hr_locations_all loc,
+  hr.per_jobs jobs,
+  hr.hr_all_organization_units org
+WHERE peo.Person_id = mat.person_id
+AND TRUNC(sysdate) BETWEEN peo.effective_start_date AND peo.effective_end_date
+AND TRUNC(sysdate) BETWEEN mat.effective_start_date AND mat.effective_end_date
+AND peo.current_employee_flag = 'Y'
+AND mat.primary_flag          = 'Y'
+AND org.organization_id       = mat.organization_id
+AND jobs.job_id               = mat.job_id
+AND loc.location_id           = mat.location_id
+AND mat.ASSIGNMENT_ID         = kbb.ASSIGNMENT_ID
+AND kbb.ASSIGNMENT_ACTION_ID  = kbd.ASSIGNMENT_ACTION_ID
+AND kbd.balance_type_id       = pbt.BALANCE_type_id
+AND kbd.BALANCE_TYPE_ID      IN ('505564','505566')
+--AND peo.employee_number       = '428885'
+AND kbb.EFFECTIVE_DATE BETWEEN '31-dec-2011' AND TRUNC(sysdate)
+GROUP BY peo.employee_number,
+  peo.full_name,
+  org.name ,
+  loc.location_code ,
+  loc.region_2 ,
+  jobs.name ,
+  mat.ass_attribute2 ,
+  pbt.balance_name
