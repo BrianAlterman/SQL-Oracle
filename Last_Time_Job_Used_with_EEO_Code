@@ -1,0 +1,38 @@
+SELECT DISTINCT(jobs.name) AS "Job Name",
+apps.meaning as "EEO Category",
+   jobs.date_from     AS "From",
+  jobs.date_to             AS "To",
+  mat.effective_end_date   AS "Last Date in Job",
+  CASE
+    WHEN mat.effective_end_date > TRUNC(sysdate)
+    THEN 'CURRENT USE'
+    WHEN mat.effective_end_date IS NULL
+    THEN 'NEVER USED'
+    WHEN mat.effective_end_date BETWEEN TRUNC(sysdate)- 365 AND TRUNC(sysdate)
+    THEN 'IN PREVIOUS YEAR'
+    WHEN mat.effective_end_date BETWEEN TRUNC(sysdate) - 730 AND TRUNC(sysdate) - 366
+    THEN 'BETWEEN 1 AND 2 YEARS AGO'
+    WHEN mat.effective_end_date BETWEEN TRUNC(sysdate) - 1095 AND TRUNC(sysdate) - 731
+    THEN 'BETWEEN 2 AND 3 YEARS AGO'
+    WHEN mat.effective_end_date BETWEEN TRUNC(sysdate) - 1460 AND TRUNC(sysdate) - 1096
+    THEN 'BETWEEN 3 AND 4 YEARS AGO'
+    WHEN mat.effective_end_date BETWEEN TRUNC(sysdate) - 1825 AND TRUNC(sysdate) - 1461
+    THEN 'BETWEEN 4 AND 5 YEARS AGO'
+    WHEN mat.effective_end_date < TRUNC(sysdate) - 1826
+    THEN 'GREATER THAN 5 YEARS'
+    ELSE 'ERROR'
+  END AS "Last Use"
+FROM hr.per_jobs jobs,
+  hr.per_all_assignments_f mat,
+  APPS.HR_LOOKUPS apps
+WHERE mat.job_id (+)        = jobs.job_id
+AND jobs.JOB_INFORMATION1   = apps.lookup_code
+AND (mat.effective_end_date =
+  (SELECT MAX(mata.effective_end_date)
+  FROM hr.per_all_assignments_f mata
+  WHERE mata.job_id = jobs.job_id
+  )
+OR mat.effective_end_date IS NULL)
+AND jobs.date_to          IS NULL
+--and jobs.name like '%.91.%'
+and apps.lookup_type = 'US_EEO1_JOB_CATEGORIES'
