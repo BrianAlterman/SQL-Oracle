@@ -1,0 +1,34 @@
+SELECT peo.employee_number AS "EID",
+  peo.full_name            AS "Full Name",
+  org.name                 AS "Organization",
+  loc.location_code        AS "Location",
+  jobs.name                AS "Job Name",
+  mat.ass_attribute2       AS "Business Title",
+  per.date_start           AS "Hire Date",
+  mat2.employment_category AS "Hire Cat",
+  mat.employment_category  AS "Current Cat"
+FROM hr.per_all_people_f peo,
+  hr.per_all_assignments_f mat,
+  hr.per_all_assignments_f mat2,
+  hr.hr_all_organization_units org,
+  hr.per_jobs jobs,
+  hr.hr_locations_all loc,
+  hr.per_periods_of_service per
+WHERE TRUNC(sysdate) BETWEEN peo.effective_start_date AND peo.effective_end_date
+AND TRUNC(sysdate) BETWEEN mat.effective_start_date AND mat.effective_end_date
+AND per.date_start BETWEEN mat2.effective_start_date AND mat2.effective_end_date
+AND peo.person_id             = mat.person_id
+AND peo.person_id             = mat2.person_id
+AND mat.organization_id       = org.organization_id
+AND loc.location_id           = mat.location_id
+AND mat.job_id                = jobs.job_id
+AND peo.current_employee_flag = 'Y'
+AND mat.primary_flag          = 'Y'
+AND per.person_id             = peo.person_id
+AND mat2.employment_category IN ('PR', 'FR')
+AND mat.employment_category  IN ('PT', 'FT')
+AND per.date_start            =
+  (SELECT MAX(per2.date_start)
+  FROM HR.per_periods_of_service per2
+  WHERE per2.person_id = peo.person_id
+  )
