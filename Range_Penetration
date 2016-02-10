@@ -1,0 +1,50 @@
+SELECT peo.employee_number AS "EIN",
+  peo.full_name            AS "Full Name",
+  org.name                                                                          AS "Organization",
+  jobs.name                                                                         AS "Job Name",
+  mat.ass_attribute2                                                                AS "Business Title",
+  bas.name                                                                          AS "Type",
+  TO_CHAR (pro.proposed_salary_n , '$9,999,999.99')                                 AS "Pay Rate",
+  bas.pay_annualization_factor                                                      AS "Factor" ,
+  TO_CHAR ((bas.pay_annualization_factor * pro.proposed_salary_n), '$9,999,999.99') AS "Annualized",
+  gra.name                                                                          AS "Grade",
+  TO_CHAR ("Min", '$9,999,999.99')                                                  AS "Min",
+  TO_CHAR ("Mid", '$9,999,999.99')                                                  AS "Mid",
+  TO_CHAR ("Max", '$9,999,999.99')                                                  AS "Max",
+  CASE
+    WHEN gra.name IS NULL
+    THEN NULL
+    WHEN JOBS.JOB_INFORMATION3          IN 'NEX'
+    THEN ROUND((((pro.proposed_salary_n) - "Min")/("Max"-"Min"))*100,2)
+      ||'%'
+    WHEN JOBS.JOB_INFORMATION3                IN 'EX'
+    THEN ROUND((((bas.pay_annualization_factor * pro.proposed_salary_n) - "Min")/("Max"-"Min"))*100,2)
+      ||'%'
+    ELSE NULL
+  END AS "Range Pen"
+FROM hr.per_all_people_f peo,
+  hr.per_all_assignments_f mat,
+  hr.per_pay_proposals pro,
+  hr.hr_all_organization_units org,
+  hr.per_jobs jobs,
+  hr.per_pay_bases bas,
+  hr.per_grades gra,
+  (SELECT grr.effective_end_date AS "END",
+    grr.grade_or_spinal_point_id AS "GRID",
+    grr.minimum                  AS "Min",
+    grr.mid_value                AS "Mid",
+    grr.maximum                  AS "Max"
+  FROM hr.pay_grade_rules_f grr
+  )
+WHERE peo.person_id     = mat.person_id
+AND mat.assignment_id   = pro.assignment_id
+AND mat.grade_id        = gra.grade_id (+)
+AND ((gra.grade_id      = "GRID" (+))
+AND ("END"              = '31-dec-4712'
+OR "END"               IS NULL))
+AND org.organization_id = mat.organization_id
+AND jobs.job_id      = mat.job_id
+AND bas.pay_basis_id = mat.pay_basis_id
+AND TRUNC(sysdate) BETWEEN peo.effective_start_date AND peo.effective_end_date
+AND TRUNC(sysdate) BETWEEN mat.effective_start_date AND mat.effective_end_date
+AND pro.date_to > TRUNC(sysdate)
