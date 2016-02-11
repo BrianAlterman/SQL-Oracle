@@ -1,0 +1,62 @@
+SELECT DISTINCT PEO.EMPLOYEE_NUMBER AS "EMPLOYEE_NUMBER",
+  PEO.PERSON_ID                     AS "PERSON_ID",
+  CASE
+    WHEN peo.known_as  IS NULL
+    AND peo.attribute5 IS NULL
+    THEN upper(peo.first_name)
+    WHEN peo.known_as IS NOT NULL
+    THEN upper(peo.known_as)
+    WHEN peo.attribute5 IS NOT NULL
+    AND peo.known_as    IS NULL
+    THEN upper(peo.attribute5)
+    ELSE peo.first_name
+  END                  AS "PREFERRED_NAME",
+  upper(peo.last_name) AS "LAST_NAME",
+  PEO.FULL_NAME        AS "FULL_NAME",
+  ASMT.ASS_ATTRIBUTE2  AS "BUSINESS_TITLE",
+  PEO.EMAIL_ADDRESS    AS "EMAIL_ADDRESS",
+  JOBS.NAME            AS "JOB_CODE",
+  ORG.NAME             AS "ORGANIZATION",
+  LOC.LOCATION_CODE    AS "LOCATION",
+  GRAD.NAME            AS "GRADE",
+  GRAD2.NAME           AS "PREV GRADE",
+  ASMT.EFFECTIVE_START_DATE,
+  asmt2.effective_start_date,
+  SVC.DATE_START AS "HIRE_DATE"
+FROM HR.PER_ALL_PEOPLE_F PEO,
+  HR.PER_ALL_ASSIGNMENTS_F ASMT,
+  HR.PER_ALL_ASSIGNMENTS_F ASMT2,
+  HR.PER_JOBS JOBS,
+  HR.hr_all_organization_units ORG,
+  HR.HR_LOCATIONS_ALL LOC,
+  HR.PER_GRADES GRAD,
+  HR.PER_GRADES GRAD2,
+  HR.PER_PERIODS_OF_SERVICE SVC
+WHERE PEO.PERSON_ID                     = ASMT.PERSON_ID
+AND PEO.PERSON_ID                       = ASMT2.PERSON_ID
+AND JOBS.JOB_ID                         = ASMT.JOB_ID
+AND ORG.ORGANIZATION_ID                 = ASMT.ORGANIZATION_ID
+AND LOC.LOCATION_ID                     = ASMT.LOCATION_ID
+AND ASMT.GRADE_ID                       = GRAD.GRADE_ID(+)
+AND ASMT2.GRADE_ID                      = GRAD2.GRADE_ID(+)
+AND SVC.PERSON_ID                       = ASMT.PERSON_ID
+AND ASMT.ASSIGNMENT_STATUS_TYPE_ID NOT IN ('3')
+AND SVC.DATE_START                      =
+  (SELECT MAX(SVCc.date_start)
+  FROM hr.per_periods_of_service SVCc
+  WHERE peo.person_id  = SVCc.person_id
+  AND svcc.date_start <= asmt.effective_start_date
+  )
+AND TRUNC(SYSDATE) BETWEEN PEO.EFFECTIVE_START_DATE AND PEO.EFFECTIVE_END_DATE
+/*AND ASMT.EFFECTIVE_END_DATE =
+  (SELECT MAX(BB.EFFECTIVE_END_DATE)
+  FROM hr.per_all_assignments_f BB
+  WHERE BB.person_id = peo.person_id
+  )*/
+AND ASMT2.EFFECTIVE_END_DATE = ASMT.EFFECTIVE_START_DATE - 1
+AND ASMT.EFFECTIVE_START_DATE BETWEEN '01-SEP-2014' AND '31-OCT-2014'
+AND GRAD.GRADE_ID       <> GRAD2.GRADE_ID
+--AND PEO.EMPLOYEE_NUMBER IN('')
+AND PEO.CURRENT_EMPLOYEE_FLAG = 'Y'
+AND ASMT.primary_flag         = 'Y'
+ORDER BY PEO.FULL_NAME, asmt2.effective_start_date;
