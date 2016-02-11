@@ -1,0 +1,18 @@
+SELECT houparent.name AS "PARENT_ORG",
+  houchild.name       AS "CHILD_ORG",
+  houchild.date_from,
+  houchild.date_to
+FROM hr.PER_ORG_STRUCTURE_ELEMENTS pose,
+  hr_all_organization_units houchild,
+  hr_all_organization_units houparent,
+  hr.PER_ORG_STRUCTURE_VERSIONS posv,
+  HR.PER_ORGANIZATION_STRUCTURES pos
+WHERE pose.ORGANIZATION_ID_CHILD   = houchild.ORGANIZATION_ID
+AND pose.ORGANIZATION_ID_PARENT    = houparent.ORGANIZATION_ID
+AND pose.ORG_STRUCTURE_VERSION_ID  = posv.ORG_STRUCTURE_VERSION_ID
+AND posv.ORGANIZATION_STRUCTURE_ID = pos.ORGANIZATION_STRUCTURE_ID
+AND pos.name                      IN ('FDS Primary') --,'Security Non-HR Only','Security Non-Stores Only','FD Corporate Vacation')
+  --and houchild.name                 in('7510000 HR Risk Mgmt')
+AND houchild.DATE_to IS NULL
+ORDER BY houparent.name,
+  houchild.name
