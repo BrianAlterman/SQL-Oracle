@@ -1,0 +1,65 @@
+--Term date from EBSPRD
+SELECT peo.national_identifier                                          AS "FicaNbr",
+  upper(peo.last_name)                                                  AS "LastName",
+  upper(peo.first_name)                                                 AS "FirstName",
+  'Terminated'                                                          AS "Terminated",
+  per.leaving_reason                                                    AS "TermCode",
+  case
+  when look2.description  = 'E' then 'Y'
+  when look2.description = 'I' then 'N'
+  else 'ERROR' end AS "Rehire",
+  TO_CHAR(to_date(per.date_start, 'DD-MON-RR'), 'YYYYMMDD')             AS "StartDate",
+  TO_CHAR(to_date(per.actual_termination_date, 'DD-MON-RR'), 'YYYYMMDD')AS "TermDate",
+  NULL                                                                  AS "AlienDate",
+  upper(jobs.name)                                                      AS "Description",
+  look.meaning as "Term Description"
+FROM hr.per_all_people_f peo,
+  HR.PER_PERIODS_OF_SERVICE per,
+  hr.per_jobs jobs,
+  hr.per_all_assignments_f mat,
+  apps.hr_lookups look,
+  apps.hr_lookups look2
+WHERE TRUNC(sysdate) BETWEEN peo.effective_start_date AND peo.effective_end_date
+AND per.actual_termination_date BETWEEN mat.effective_start_date AND mat.effective_end_date
+AND peo.person_id                = mat.person_id
+AND peo.PERSON_ID                = per.PERSON_ID
+AND jobs.job_id                  = mat.job_id
+AND look.lookup_type             = 'LEAV_REAS'
+AND look2.lookup_type            = 'FD_TERM_REASON'
+AND per.leaving_reason           = look.lookup_code (+)
+AND per.leaving_reason           = look2.lookup_code (+)
+AND per.actual_termination_date >= '2-mar-2014'
+AND per.actual_termination_date  =
+  (SELECT MAX(per2.actual_termination_date)
+  FROM hr.per_periods_of_service per2
+  WHERE per.person_id = per2.person_id
+  ) ;
+  
+  
+  --Term info from FINAPP
+SELECT peo.national_identifier                                          AS "FicaNbr",
+  upper(peo.last_name)                                                  AS "LastName",
+  upper(peo.first_name)                                                 AS "FirstName",
+  'Terminated'                                                          AS "Terminated",
+  per.leaving_reason                                                    AS "Term Code",
+  'TEMP'                                                                AS "Rehire",
+  TO_CHAR(to_date(per.date_start, 'DD-MON-RR'), 'YYYYMMDD')             AS "StartDate",
+  TO_CHAR(to_date(per.actual_termination_date, 'DD-MON-RR'), 'YYYYMMDD')AS "TermDate",
+  NULL                                                                  AS "AlienDate",
+  upper(jobs.name)                                                               AS "Description"
+  --'TEMP'                                                                AS "Term Description"
+FROM hr.per_all_people_f peo,
+hr.per_all_assignments_f mat,
+hr.per_jobs jobs,
+  HR.PER_PERIODS_OF_SERVICE per
+WHERE TRUNC(sysdate) BETWEEN peo.effective_start_date AND peo.effective_end_date
+and per.actual_termination_date BETWEEN mat.effective_start_date AND mat.effective_end_date
+and mat.person_id = peo.person_id
+and jobs.job_id = mat.job_id
+AND peo.PERSON_ID               = per.PERSON_ID
+and per.leaving_reason is not null
+AND per.actual_termination_date =
+  (SELECT MAX(per2.actual_termination_date)
+  FROM hr.per_periods_of_service per2
+  WHERE per.person_id = per2.person_id
+  )
