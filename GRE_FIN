@@ -1,0 +1,7 @@
+SELECT org.name         AS "Organization", org.date_to,
+  orgi.org_information1 AS "Employer ID#"
+FROM HR.hr_all_organization_units org,
+  HR.hr_organization_information orgi
+WHERE  orgi.org_information_context = 'Employer Identification'
+and org.organization_id = orgi.organization_id
+and org.date_to is null
