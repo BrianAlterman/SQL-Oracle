@@ -1,0 +1,40 @@
+
+SELECT DISTINCT j.name "Job Code",
+  CASE
+    WHEN v.grade_id IS NULL
+    THEN NULL
+    ELSE x.name
+  END "Grade",
+   "Job Role",
+  j.job_information3 "FLSA",
+  Z.MEANING "EEO Category",
+  j.attribute5 "Job Family",
+  j.attribute10 "Other Bonus",
+  j.attribute3 "Ben Class",
+  j.attribute8 "Target",
+  j.attribute9 "LTI",
+  j.attribute15 "Core Role",
+  j.attribute16 "Job Tier Level",
+  j.attribute12 "Time Card Required",
+  j.attribute14 "Production DC",
+  j.attribute7 "Generic Data Access Profile",
+  j.attribute13 "3 Digit Job Code"
+FROM 
+  hr.per_jobs j,
+  applsys.fnd_lookup_values Z,
+  hr.per_valid_grades v,
+  hr.per_grades x,
+  (select j.name "JB", e.jei_information1 "Job Role"
+from hr.PER_JOB_EXTRA_INFO e, hr.per_jobs j 
+where e.job_id = j.job_id and e.information_type in 'Job Role')
+WHERE j.job_id       = v.job_id (+)
+AND (v.grade_id    = x.grade_id
+OR v.grade_id     IS NULL)
+AND (Z.LOOKUP_TYPE       = 'US_EEO1_JOB_CATEGORIES'
+OR Z.LOOKUP_TYPE        IS NULL)
+AND j.job_INFORMATION1   = Z.LOOKUP_CODE (+)
+and j.name = "JB" (+)
+/*AND j.name              IN ('Buyer 05...', 'DC RVP...', 'Director 02...', 'Director 03...', 
+                            'DVP 01...', 'DVP 02...', 'Group VP...', 'RVP in Training...', 
+                            'RVP...', 'VP 02...')*/
+ORDER BY j.name
