@@ -1,0 +1,23 @@
+SELECT ffvt.flex_value_meaning,
+  ffvt.description
+FROM applsys.fnd_flex_values ffv,
+  applsys.FND_FLEX_VALUES_TL ffvt
+WHERE ffv.flex_value_id   = ffvt.flex_value_id
+AND ffv.enabled_flag      = 'Y'
+AND ffv.flex_value_set_id =
+  (SELECT flex_value_set_id
+  FROM applsys.fnd_flex_value_sets
+  WHERE flex_value_set_name = 'FD_HR_US_JROLE'
+  );
+
+SELECT ffvt.flex_value_meaning,
+  ffvt.description
+FROM applsys.fnd_flex_values ffv,
+  applsys.FND_FLEX_VALUES_TL ffvt
+WHERE ffv.flex_value_id   = ffvt.flex_value_id
+AND ffv.enabled_flag      = 'Y'
+AND ffv.flex_value_set_id =
+  (SELECT flex_value_set_id
+  FROM applsys.fnd_flex_value_sets
+  WHERE flex_value_set_name = 'FD_HR_US_VPTO_RATE_OVERRIDE_EE'
+  );
