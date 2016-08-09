@@ -1,0 +1,102 @@
+SELECT "File"
+FROM
+  (SELECT TO_CHAR(to_date(sysdate, 'DD-MON-RR'), 'MMDDYYYY')
+    ||TO_CHAR(sysdate,'HH24MISS')
+    ||'DLT' --Parent ID
+    ||'683' --Corp ID
+    ||'E'
+    ||'Q'
+    ||'01012016'
+    ||'03312016'
+    ||'01012016'
+    ||'03312016'
+    ||'12072015'
+    ||'12182015'
+    ||lpad("Count",10) AS "File",
+    1                  AS "Sort"
+  FROM dual,
+    (SELECT COUNT (peo.employee_number) AS "Count"
+    FROM hr.per_all_people_f peo,
+      hr.per_all_assignments_f mat,
+      hr.hr_all_organization_units org,
+      hr.per_jobs jobs,
+      hr.hr_locations_all loc,
+      hr.per_addresses adr,
+      hr.per_periods_of_service per
+    WHERE TRUNC(sysdate) BETWEEN peo.effective_start_date AND peo.effective_end_date
+    AND TRUNC(sysdate) BETWEEN mat.effective_start_date AND mat.effective_end_date
+    AND peo.person_id             = mat.person_id
+    AND per.person_id             = peo.person_id
+    AND mat.organization_id       = org.organization_id
+    AND loc.location_id           = mat.location_id
+    AND mat.job_id                = jobs.job_id
+    AND peo.current_employee_flag = 'Y'
+    AND mat.primary_flag          = 'Y'
+    AND adr.person_id             = peo.person_id
+    AND adr.date_to              IS NULL
+    AND adr.primary_flag          = 'Y'
+    AND loc.attribute14          IS NULL
+    AND per.date_start           <= :Cutoff --First Run/10-1-2015
+    and jobs.name not like 'DT %'
+    AND per.date_start            =
+      (SELECT MAX(per2.date_start)
+      FROM hr.per_periods_of_service per2
+      WHERE per2.person_id = peo.person_id
+      )
+    )
+  UNION
+  SELECT REPLACE(peo.national_identifier, '-', '')
+    || rpad(peo.employee_number,12)
+    ||rpad(peo.first_name, 20)
+    ||rpad(peo.last_name, 30)
+    ||rpad(NVL(adr.address_line1,' '),30)
+    ||rpad(NVL(adr.address_line2,' '),30)
+    ||rpad(NVL(adr.address_line3,' '),30)
+    ||rpad(NVL(adr.town_or_city,' '),30)
+    ||rpad(NVL(adr.region_2, ' '), 30)
+    ||rpad(REPLACE(adr.postal_code, '-', ''), 9)
+    ||'US'
+    ||rpad(NVL(peo.email_address,' '),80)
+    ||'FDO         ' --rpad(NVL(NULL, ' '), 12) -- Placeholder/Payroll code not defined
+    ||rpad(NVL(NULL, ' '), 12) -- Placeholder/Location code not defined
+    ||
+    CASE -- Only qualification is hire date cutoff/termed team members in file?
+      WHEN per.date_start > :Cutoff
+      THEN 'N '
+      ELSE 'Y '
+    END
+    ||TO_CHAR(to_date(peo.date_of_birth, 'DD-MON-RR'), 'MMDDYYYY')
+    ||rpad(NVL(NULL, ' '), 22)
+    ||rpad(NVL(NULL, '1 '), 2) 
+      AS "File",
+    2 AS "Sort"
+  FROM hr.per_all_people_f peo,
+    hr.per_all_assignments_f mat,
+    hr.hr_all_organization_units org,
+    hr.per_jobs jobs,
+    hr.hr_locations_all loc,
+    hr.per_addresses adr,
+    hr.per_periods_of_service per
+  WHERE TRUNC(sysdate) BETWEEN peo.effective_start_date AND peo.effective_end_date
+  AND TRUNC(sysdate) BETWEEN mat.effective_start_date AND mat.effective_end_date
+  AND peo.person_id             = mat.person_id
+  AND per.person_id             = peo.person_id
+  AND mat.organization_id       = org.organization_id
+  AND loc.location_id           = mat.location_id
+  AND mat.job_id                = jobs.job_id
+  AND peo.current_employee_flag = 'Y'
+  AND mat.primary_flag          = 'Y'
+  AND adr.person_id             = peo.person_id
+  AND adr.date_to              IS NULL
+  AND adr.primary_flag          = 'Y'
+  AND loc.attribute14          IS NULL
+  AND per.date_start           <= :Cutoff
+  and jobs.name not like 'DT %'
+  AND per.date_start            =
+    (SELECT MAX(per2.date_start)
+    FROM hr.per_periods_of_service per2
+    WHERE per2.person_id = peo.person_id
+    )
+  --AND peo.employee_number IN ('140330','610138')
+  )
+ORDER BY "Sort"
