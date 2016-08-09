@@ -1,0 +1,709 @@
+SELECT peo.employee_number AS "Employee ID",
+  CASE
+    WHEN peo.known_as  IS NULL
+    AND peo.attribute5 IS NULL
+    THEN upper(peo.first_name)
+    WHEN peo.known_as IS NOT NULL
+    THEN upper(peo.known_as)
+    WHEN peo.attribute5 IS NOT NULL
+    AND peo.known_as    IS NULL
+    THEN upper(peo.attribute5)
+    ELSE peo.first_name
+  END                  AS "First Name",
+  upper(peo.last_name) AS "Last Name",
+  peo1.employee_number AS "Supervisor ID",
+  CASE
+    WHEN peo1.known_as  IS NULL
+    AND peo1.attribute5 IS NULL
+    THEN upper(peo1.first_name)
+    WHEN peo1.known_as IS NOT NULL
+    THEN upper(peo1.known_as)
+    WHEN peo1.attribute5 IS NOT NULL
+    AND peo1.known_as    IS NULL
+    THEN upper(peo1.attribute5)
+    ELSE upper(peo1.first_name)
+  END
+  ||' '
+  ||upper(peo1.last_name)         AS "Supervisor Name",
+  jobs.name                       AS "Job Code",
+  peo.email_address               AS "Email Address",
+  asmt.ass_attribute2             AS "Business Title",
+  org.name                        AS "Organization",
+  loc.location_code               AS "Location",
+  SUBSTR(peo.date_of_birth, 1, 6) AS "Birthday",
+  SUBSTR(peo.date_of_birth, 1, 2) AS "Birth Day",
+  SUBSTR(peo.date_of_birth, 4, 3) AS "Birthday Month",
+  CASE
+    WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+    THEN SUBSTR(svc.ADJUSTED_SVC_DATE,4,3)
+    ELSE SUBSTR(svc.date_start,4,3)
+  END AS "FD Hire Month",
+  CASE
+    WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+    THEN TO_CHAR(svc.ADJUSTED_SVC_DATE, 'MM/DD/YYYY')
+    ELSE TO_CHAR(svc.date_start, 'MM/DD/YYYY')
+  END AS "FD Hire Date",
+  TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+  CASE
+    WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+    THEN svc.ADJUSTED_SVC_DATE
+    ELSE svc.date_start
+  END) /365.25, 1, 2)) AS "Years of Service",
+  CASE
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))          = 1
+    AND SUBSTR(TRUNC(sysdate),4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))          = 3
+    AND SUBSTR(TRUNC(sysdate),4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))          = 5
+    AND SUBSTR(TRUNC(sysdate),4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))          = 10
+    AND SUBSTR(TRUNC(sysdate),4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))          = 15
+    AND SUBSTR(TRUNC(sysdate),4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))          = 20
+    AND SUBSTR(TRUNC(sysdate),4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))          = 25
+    AND SUBSTR(TRUNC(sysdate),4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))          = 30
+    AND SUBSTR(TRUNC(sysdate),4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))          = 35
+    AND SUBSTR(TRUNC(sysdate),4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))         >= 40
+    AND SUBSTR(TRUNC(sysdate),4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    ELSE ''
+  END AS "Key Anniversary",
+  CASE
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))          < 1
+    AND SUBSTR(Last_Day(ADD_MONTHS(trunc(sysdate),0))+1,4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))          = 2
+    AND SUBSTR(Last_Day(ADD_MONTHS(trunc(sysdate),0))+1,4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))          = 4
+    AND SUBSTR(Last_Day(ADD_MONTHS(trunc(sysdate),0))+1,4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))          = 9
+    AND SUBSTR(Last_Day(ADD_MONTHS(trunc(sysdate),0))+1,4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))          = 14
+    AND SUBSTR(Last_Day(ADD_MONTHS(trunc(sysdate),0))+1,4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))          = 19
+    AND SUBSTR(Last_Day(ADD_MONTHS(trunc(sysdate),0))+1,4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))          = 24
+    AND SUBSTR(Last_Day(ADD_MONTHS(trunc(sysdate),0))+1,4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))          = 29
+    AND SUBSTR(Last_Day(ADD_MONTHS(trunc(sysdate),0))+1,4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))          = 34
+    AND SUBSTR(Last_Day(ADD_MONTHS(trunc(sysdate),0))+1,4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))         >= 39
+    AND SUBSTR(Last_Day(ADD_MONTHS(trunc(sysdate),0))+1,4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    ELSE ''
+  END AS "Key Anniversary Next Month"
+FROM hr.per_all_people_f peo,
+  hr.per_all_people_f peo1,
+  hr.per_all_assignments_f asmt,
+  hr.per_jobs jobs,
+  hr.hr_locations_all loc,
+  hr.hr_all_organization_units org,
+  hr.per_periods_of_service svc
+WHERE peo.person_id           = asmt.person_id
+AND asmt.job_id               = jobs.job_id
+AND asmt.supervisor_id        = peo1.person_id(+)
+AND asmt.location_id          = loc.location_id
+AND asmt.organization_id      = org.organization_id
+AND SVC.PERSON_ID             = ASMT.PERSON_ID
+AND org.type NOT             IN('DC', 'CORPDC', 'FLEET')
+AND asmt.primary_flag         = 'Y'
+AND peo.current_employee_flag = 'Y'
+AND (peo1.employee_number    IS NOT NULL
+OR peo.employee_number = '1067251')
+AND TRUNC(sysdate) BETWEEN peo.effective_start_date AND peo.effective_end_date
+AND SVC.DATE_START =
+  (SELECT MAX(SVCc.date_start)
+  FROM hr.per_periods_of_service SVCc
+  WHERE peo.person_id  = SVCc.person_id
+  AND svcc.date_start <= asmt.effective_start_date
+  )
+AND (PEO1.EFFECTIVE_END_DATE =
+  (SELECT MAX(PEO2.EFFECTIVE_END_DATE)
+  FROM hr.PER_ALL_PEOPLE_F PEO2
+  WHERE PEO2.PERSON_ID = PEO1.PERSON_ID
+  )
+OR PEO1.EFFECTIVE_END_DATE IS NULL)
+AND ASMT.effective_end_date =
+  (SELECT MAX(BB.EFFECTIVE_END_DATE)
+  FROM hr.per_all_assignments_f BB
+  WHERE BB.person_id = peo.person_id
+  )
+AND peo.employee_number NOT IN('799943', '811324',  '28369', '359383', '763896' ,'26756','28184','371372', '28254', '538698', '25725', '25862', '28111')
+UNION
+SELECT peo.employee_number AS "Employee ID",
+  CASE
+    WHEN peo.known_as  IS NULL
+    AND peo.attribute5 IS NULL
+    THEN upper(peo.first_name)
+    WHEN peo.known_as IS NOT NULL
+    THEN upper(peo.known_as)
+    WHEN peo.attribute5 IS NOT NULL
+    AND peo.known_as    IS NULL
+    THEN upper(peo.attribute5)
+    ELSE peo.first_name
+  END                  AS "First Name",
+  upper(peo.last_name) AS "Last Name",
+  peo1.employee_number AS "Supervisor ID",
+  CASE
+    WHEN peo1.known_as  IS NULL
+    AND peo1.attribute5 IS NULL
+    THEN upper(peo1.first_name)
+    WHEN peo1.known_as IS NOT NULL
+    THEN upper(peo1.known_as)
+    WHEN peo1.attribute5 IS NOT NULL
+    AND peo1.known_as    IS NULL
+    THEN upper(peo1.attribute5)
+    ELSE upper(peo1.first_name)
+  END
+  ||' '
+  ||upper(peo1.last_name)         AS "Supervisor Name",
+  jobs.name                       AS "Job Code",
+  peo.email_address               AS "Email Address",
+  asmt.ass_attribute2             AS "Business Title",
+  org.name                        AS "Organization",
+  loc.location_code               AS "Location",
+  SUBSTR(peo.date_of_birth, 1, 6) AS "Birthday",
+  SUBSTR(peo.date_of_birth, 1, 2) AS "Birth Day",
+  SUBSTR(peo.date_of_birth, 4, 3) AS "Birthday Month",
+  CASE
+    WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+    THEN SUBSTR(svc.ADJUSTED_SVC_DATE,4,3)
+    ELSE SUBSTR(svc.date_start,4,3)
+  END AS "FD Hire Month",
+  CASE
+    WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+    THEN TO_CHAR(svc.ADJUSTED_SVC_DATE, 'MM/DD/YYYY')
+    ELSE TO_CHAR(svc.date_start, 'MM/DD/YYYY')
+  END AS "FD Hire Date",
+  TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+  CASE
+    WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+    THEN svc.ADJUSTED_SVC_DATE
+    ELSE svc.date_start
+  END) /365.25, 1, 2)) AS "Years of Service",
+  CASE
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))          = 1
+    AND SUBSTR(TRUNC(sysdate),4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))          = 3
+    AND SUBSTR(TRUNC(sysdate),4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))          = 5
+    AND SUBSTR(TRUNC(sysdate),4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))          = 10
+    AND SUBSTR(TRUNC(sysdate),4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))          = 15
+    AND SUBSTR(TRUNC(sysdate),4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))          = 20
+    AND SUBSTR(TRUNC(sysdate),4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))          = 25
+    AND SUBSTR(TRUNC(sysdate),4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))          = 30
+    AND SUBSTR(TRUNC(sysdate),4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))          = 35
+    AND SUBSTR(TRUNC(sysdate),4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))         >= 40
+    AND SUBSTR(TRUNC(sysdate),4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    ELSE ''
+  END AS "Key Anniversary",
+  CASE
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))          < 1
+    AND SUBSTR(Last_Day(ADD_MONTHS(trunc(sysdate),0))+1,4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))          = 2
+    AND SUBSTR(Last_Day(ADD_MONTHS(trunc(sysdate),0))+1,4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))          = 4
+    AND SUBSTR(Last_Day(ADD_MONTHS(trunc(sysdate),0))+1,4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))          = 9
+    AND SUBSTR(Last_Day(ADD_MONTHS(trunc(sysdate),0))+1,4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))          = 14
+    AND SUBSTR(Last_Day(ADD_MONTHS(trunc(sysdate),0))+1,4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))          = 19
+    AND SUBSTR(Last_Day(ADD_MONTHS(trunc(sysdate),0))+1,4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))          = 24
+    AND SUBSTR(Last_Day(ADD_MONTHS(trunc(sysdate),0))+1,4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))          = 29
+    AND SUBSTR(Last_Day(ADD_MONTHS(trunc(sysdate),0))+1,4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))          = 34
+    AND SUBSTR(Last_Day(ADD_MONTHS(trunc(sysdate),0))+1,4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    WHEN TO_NUMBER(SUBSTR((Last_Day(ADD_MONTHS(TRUNC(sysdate),0)) -
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END)/365.25, 1, 2))         >= 39
+    AND SUBSTR(Last_Day(ADD_MONTHS(trunc(sysdate),0))+1,4,3) = SUBSTR(
+      CASE
+        WHEN svc.ADJUSTED_SVC_DATE IS NOT NULL
+        THEN svc.ADJUSTED_SVC_DATE
+        ELSE svc.date_start
+      END,4,3)
+    THEN 'Y'
+    ELSE ''
+  END AS "Key Anniversary Next Month"
+FROM hr.per_all_people_f peo,
+  hr.per_all_people_f peo1,
+  hr.per_all_assignments_f asmt,
+  hr.per_jobs jobs,
+  hr.hr_locations_all loc,
+  hr.hr_all_organization_units org,
+  hr.per_periods_of_service svc
+WHERE peo.person_id            = asmt.person_id
+AND asmt.job_id                = jobs.job_id
+AND asmt.supervisor_id         = peo1.person_id(+)
+AND asmt.location_id           = loc.location_id
+AND asmt.organization_id       = org.organization_id
+AND SVC.PERSON_ID              = ASMT.PERSON_ID
+AND org.type                  IN('DC', 'CORPDC', 'FLEET')
+AND jobs.job_information3 NOT IN ('NEX')
+AND asmt.primary_flag          = 'Y'
+AND peo.current_employee_flag  = 'Y'
+AND (peo1.employee_number    IS NOT NULL
+OR peo.employee_number = '1067251')
+AND TRUNC(sysdate) BETWEEN peo.effective_start_date AND peo.effective_end_date
+AND SVC.DATE_START =
+  (SELECT MAX(SVCc.date_start)
+  FROM hr.per_periods_of_service SVCc
+  WHERE peo.person_id  = SVCc.person_id
+  AND svcc.date_start <= asmt.effective_start_date
+  )
+AND (PEO1.EFFECTIVE_END_DATE =
+  (SELECT MAX(PEO2.EFFECTIVE_END_DATE)
+  FROM hr.PER_ALL_PEOPLE_F PEO2
+  WHERE PEO2.PERSON_ID = PEO1.PERSON_ID
+  )
+OR PEO1.EFFECTIVE_END_DATE IS NULL)
+AND ASMT.effective_end_date =
+  (SELECT MAX(BB.EFFECTIVE_END_DATE)
+  FROM hr.per_all_assignments_f BB
+  WHERE BB.person_id = peo.person_id
+  )
