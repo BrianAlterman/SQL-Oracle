@@ -1,0 +1,31 @@
+SELECT 'AuthoriaOrganizations|784246428|178675716|1.21.110100||'
+  ||organization_id
+  ||'|'||
+    CASE
+    WHEN org.date_to IS NULL
+    THEN '0'
+    ELSE '1'
+  END||'|'
+  ||org.name
+  ||'|'
+  ||org.name
+  ||'|'
+  ||"Parent ID"
+  ||'|'
+  ||org.type
+  ||'|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||'
+FROM hr.hr_all_organization_units org,
+  (SELECT houparent.organization_id AS "Parent ID",
+    houchild.organization_id        AS "Child ID"
+  FROM hr.PER_ORG_STRUCTURE_ELEMENTS pose,
+    hr.hr_all_organization_units houchild,
+    hr.hr_all_organization_units houparent,
+    hr.PER_ORG_STRUCTURE_VERSIONS posv,
+    HR.PER_ORGANIZATION_STRUCTURES pos
+  WHERE pose.ORGANIZATION_ID_CHILD   = houchild.ORGANIZATION_ID
+  AND pose.ORGANIZATION_ID_PARENT    = houparent.ORGANIZATION_ID
+  AND pose.ORG_STRUCTURE_VERSION_ID  = posv.ORG_STRUCTURE_VERSION_ID
+  AND posv.ORGANIZATION_STRUCTURE_ID = pos.ORGANIZATION_STRUCTURE_ID
+  AND pos.name                      IN ('FDS Primary')
+  )
+WHERE "Child ID" = org.organization_id
