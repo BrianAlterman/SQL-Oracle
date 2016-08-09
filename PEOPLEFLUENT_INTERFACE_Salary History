@@ -1,0 +1,334 @@
+SELECT 'AuthoriaEmployeeSalaryHistories|784246428|178675716|1.21.110100||'
+  ||a.EMPLOYEE_NUMBER
+  ||'|'
+  || a.employee_number
+  ||((p.change_date - TO_DATE('01-JAN-1900', 'DD-MON-YYYY')) + 2)
+  ||'|'
+  ||TO_CHAR(p.change_date, 'YYYY-MM-DD')
+  ||'|'
+  ||
+  CASE
+    WHEN p.change_date BETWEEN '1-SEP-2009' AND '31-AUG-2010'
+    THEN '2010'
+    WHEN p.change_date BETWEEN '1-SEP-2010' AND '31-AUG-2011'
+    THEN '2011'
+    WHEN p.change_date BETWEEN '1-SEP-2011' AND '31-AUG-2012'
+    THEN '2012'
+    WHEN p.change_date BETWEEN '1-SEP-2012' AND '31-AUG-2013'
+    THEN '2013'
+    WHEN p.change_date BETWEEN '1-SEP-2013' AND '31-AUG-2014'
+    THEN '2014'
+    WHEN p.change_date BETWEEN '1-SEP-2014' AND '31-AUG-2015'
+    THEN '2015'
+    WHEN p.change_date BETWEEN '1-SEP-2015' AND '31-AUG-2016'
+    THEN '2016'
+    ELSE 'Error'
+  END
+  ||'|USD|'
+  ||
+  CASE
+    WHEN bas.name = 'Hourly'
+    THEN p.PROPOSED_SALARY_N
+    WHEN bas.name = 'Salaried'
+    THEN (p.PROPOSED_SALARY_N*bas.pay_annualization_factor)
+  END
+  ||'|'
+  ||
+  CASE
+    WHEN q.PROPOSED_SALARY_N < '100'
+    AND p.PROPOSED_SALARY_N  < '100'
+    THEN (p.PROPOSED_SALARY_N*2080) - (q.PROPOSED_SALARY_N*2080)
+    WHEN q.PROPOSED_SALARY_N >= '100'
+    AND p.PROPOSED_SALARY_N  >= '100'
+    THEN (p.PROPOSED_SALARY_N*12) - (q.PROPOSED_SALARY_N*12)
+    WHEN q.PROPOSED_SALARY_N < '100'
+    AND p.PROPOSED_SALARY_N >= '100'
+    THEN (p.PROPOSED_SALARY_N*12) - (q.PROPOSED_SALARY_N*2080)
+    WHEN q.PROPOSED_SALARY_N >= '100'
+    AND p.PROPOSED_SALARY_N   < '100'
+    THEN (p.PROPOSED_SALARY_N*2080) - (q.PROPOSED_SALARY_N*12)
+  END
+  ||'|'
+  ||
+  CASE
+    WHEN bas.name = 'Hourly'
+    THEN 'Hourly'
+    WHEN bas.name = 'Salaried'
+    THEN 'Annually'
+  END
+  ||'|0||1|'
+  ||gra.name
+  ||'|USD|'
+  ||
+  CASE
+    WHEN p.change_date BETWEEN '1-SEP-2009' AND '31-AUG-2010'
+    THEN '2010'
+    WHEN p.change_date BETWEEN '1-SEP-2010' AND '31-AUG-2011'
+    THEN '2011'
+    WHEN p.change_date BETWEEN '1-SEP-2011' AND '31-AUG-2012'
+    THEN '2012'
+    WHEN p.change_date BETWEEN '1-SEP-2012' AND '31-AUG-2013'
+    THEN '2013'
+    WHEN p.change_date BETWEEN '1-SEP-2013' AND '31-AUG-2014'
+    THEN '2014'
+    WHEN p.change_date BETWEEN '1-SEP-2014' AND '31-AUG-2015'
+    THEN '2015'
+    WHEN p.change_date BETWEEN '1-SEP-2015' AND '31-AUG-2016'
+    THEN '2016'
+    ELSE 'Error'
+  END
+  ||'|||'
+  ||TO_CHAR(ROUND((
+  CASE
+    WHEN (q.PROPOSED_SALARY_N > '100'
+    AND p.PROPOSED_SALARY_N   > '100')
+    OR (q.PROPOSED_SALARY_N   < '100'
+    AND p.PROPOSED_SALARY_N   < '100')
+    THEN ((p.PROPOSED_SALARY_N - q.PROPOSED_SALARY_N)/q.PROPOSED_SALARY_N)
+    WHEN p.PROPOSED_SALARY_N < '100'
+    AND q.PROPOSED_SALARY_N  > '100'
+    THEN ((p.PROPOSED_SALARY_N * 40 * 52) - (q.PROPOSED_SALARY_N * 12))/(q.PROPOSED_SALARY_N * 12)
+    WHEN p.PROPOSED_SALARY_N > '100'
+    AND q.PROPOSED_SALARY_N  < '100'
+    THEN ((p.PROPOSED_SALARY_N * 12) - (q.PROPOSED_SALARY_N * 2080))/(q.PROPOSED_SALARY_N * 2080)
+    ELSE NULL
+  END), 4),'0.0000')
+  ||'|'
+  ||gra.grade_id
+  ||'|'
+  || TO_CHAR(ROUND((
+  CASE
+    WHEN (q.PROPOSED_SALARY_N > '100'
+    AND p.PROPOSED_SALARY_N   > '100')
+    OR (q.PROPOSED_SALARY_N   < '100'
+    AND p.PROPOSED_SALARY_N   < '100')
+    THEN ((p.PROPOSED_SALARY_N - q.PROPOSED_SALARY_N)/q.PROPOSED_SALARY_N)
+    WHEN p.PROPOSED_SALARY_N < '100'
+    AND q.PROPOSED_SALARY_N  > '100'
+    THEN ((p.PROPOSED_SALARY_N * 40 * 52) - (q.PROPOSED_SALARY_N * 12))/(q.PROPOSED_SALARY_N * 12)
+    WHEN p.PROPOSED_SALARY_N > '100'
+    AND q.PROPOSED_SALARY_N  < '100'
+    THEN ((p.PROPOSED_SALARY_N * 12) - (q.PROPOSED_SALARY_N * 2080))/(q.PROPOSED_SALARY_N * 2080)
+    ELSE NULL
+  END), 4),'0.0000')
+  ||'|'
+  || CASE
+    WHEN z.lookup_code IS NOT NULL
+    THEN z.lookup_code
+    ELSE 'U'
+  END
+  ||'|'
+  ||
+  CASE
+    WHEN q.PROPOSED_SALARY_N < '100'
+    THEN (p.PROPOSED_SALARY_N*bas.pay_annualization_factor) - (q.PROPOSED_SALARY_N*2080)
+    WHEN q.PROPOSED_SALARY_N >= '100'
+    THEN (p.PROPOSED_SALARY_N*bas.pay_annualization_factor) - (q.PROPOSED_SALARY_N*bas.pay_annualization_factor)
+  END
+  ||'|'
+  ||'1|' --seq number (1 or 0?)
+  ||
+  CASE
+    WHEN q.PROPOSED_SALARY_N < '100'
+    THEN (p.PROPOSED_SALARY_N*bas.pay_annualization_factor) - (q.PROPOSED_SALARY_N*2080)
+    WHEN q.PROPOSED_SALARY_N >= '100'
+    THEN (p.PROPOSED_SALARY_N*bas.pay_annualization_factor) - (q.PROPOSED_SALARY_N*bas.pay_annualization_factor)
+  END
+  ||'||||||||||||||||1||'
+  ||
+  CASE
+    WHEN bas.name = 'Hourly'
+    THEN p.PROPOSED_SALARY_N
+    WHEN bas.name = 'Salaried'
+    THEN (p.PROPOSED_SALARY_N*bas.pay_annualization_factor)
+  END
+  ||'|'
+  ||
+  CASE
+    WHEN q.PROPOSED_SALARY_N < '100'
+    THEN (p.PROPOSED_SALARY_N*bas.pay_annualization_factor) - (q.PROPOSED_SALARY_N*2080)
+    WHEN q.PROPOSED_SALARY_N >= '100'
+    THEN (p.PROPOSED_SALARY_N*bas.pay_annualization_factor) - (q.PROPOSED_SALARY_N*bas.pay_annualization_factor)
+  END
+  ||'|0' AS "XXXXXXXXXXXXXXXXXXXXXXXXXX"
+FROM hr.per_all_people_f a,
+  hr.per_all_assignments_f b,
+  hr.per_pay_proposals p,
+  hr.per_pay_proposals q,
+  HR.PER_JOBS J,
+  hr.hr_locations_all l,
+  hr.hr_all_organization_units g,
+  hr.per_pay_bases bas,
+  APPS.HR_LOOKUPS z,
+  hr.per_grades gra
+WHERE a.person_id           = b.person_id
+AND l.location_id           = b.location_id
+and j.name not in ('CSR...', 'ASM...')
+AND b.grade_id              = gra.grade_id
+AND b.organization_id       = g.organization_id
+AND b.pay_basis_id          = bas.pay_basis_id
+AND (Z.LOOKUP_TYPE          = 'PROPOSAL_REASON'
+OR Z.LOOKUP_TYPE           IS NULL)
+AND p.proposal_reason       = z.lookup_code (+)
+AND p.ASSIGNMENT_ID         = b.assignment_id
+AND J.JOB_ID                = B.JOB_ID
+AND a.current_employee_flag = 'Y'
+AND b.primary_flag          = 'Y'
+AND q.ASSIGNMENT_ID         = b.assignment_id
+AND TRUNC(sysdate) BETWEEN a.effective_start_date AND a.effective_end_date
+AND b.effective_end_date =
+  (SELECT MAX(BB.EFFECTIVE_END_DATE)
+  FROM hr.per_all_assignments_f BB
+  WHERE BB.person_id = b.person_id
+  )
+AND p.CHANGE_DATE =
+  (SELECT MAX(pp.change_date)
+  FROM hr.per_pay_proposals pp
+  WHERE pp.assignment_id = p.assignment_id
+  )
+AND q.CHANGE_DATE =
+  (SELECT MAX(qq.change_date)
+  FROM hr.per_pay_proposals qq
+  WHERE qq.assignment_id = q.assignment_id
+  AND qq.CHANGE_DATE     < p.change_date
+    --AND qq.PROPOSED_SALARY_N <> p.PROPOSED_SALARY_N
+  )
+--and a.employee_number = '64'
+UNION
+SELECT 'AuthoriaEmployeeSalaryHistories|784246428|178675716|1.21.110100||'
+  ||a.EMPLOYEE_NUMBER
+  ||'|'
+  || a.employee_number
+  ||((p.change_date - TO_DATE('01-JAN-1900', 'DD-MON-YYYY')) + 2)
+  ||'|'
+  ||TO_CHAR(p.change_date, 'YYYY-MM-DD')
+  ||'|'
+  ||
+  CASE
+    WHEN p.change_date BETWEEN '1-SEP-2009' AND '31-AUG-2010'
+    THEN '2010'
+    WHEN p.change_date BETWEEN '1-SEP-2010' AND '31-AUG-2011'
+    THEN '2011'
+    WHEN p.change_date BETWEEN '1-SEP-2011' AND '31-AUG-2012'
+    THEN '2012'
+    WHEN p.change_date BETWEEN '1-SEP-2012' AND '31-AUG-2013'
+    THEN '2013'
+    WHEN p.change_date BETWEEN '1-SEP-2013' AND '31-AUG-2014'
+    THEN '2014'
+    WHEN p.change_date BETWEEN '1-SEP-2014' AND '31-AUG-2015'
+    THEN '2015'
+    WHEN p.change_date BETWEEN '1-SEP-2015' AND '31-AUG-2016'
+    THEN '2016'
+    ELSE 'Error'
+  END
+  ||'|USD|'
+  ||
+  CASE
+    WHEN bas.name = 'Hourly'
+    THEN p.PROPOSED_SALARY_N
+    WHEN bas.name = 'Salaried'
+    THEN (p.PROPOSED_SALARY_N*bas.pay_annualization_factor)
+  END
+  ||'|'
+  || '0'
+  ||'|'
+  ||
+  CASE
+    WHEN bas.name = 'Hourly'
+    THEN 'Hourly'
+    WHEN bas.name = 'Salaried'
+    THEN 'Annually'
+  END
+  ||'|0||1|'
+  ||gra.name
+  ||'|USD|'
+  ||
+  CASE
+    WHEN p.change_date BETWEEN '1-SEP-2009' AND '31-AUG-2010'
+    THEN '2010'
+    WHEN p.change_date BETWEEN '1-SEP-2010' AND '31-AUG-2011'
+    THEN '2011'
+    WHEN p.change_date BETWEEN '1-SEP-2011' AND '31-AUG-2012'
+    THEN '2012'
+    WHEN p.change_date BETWEEN '1-SEP-2012' AND '31-AUG-2013'
+    THEN '2013'
+    WHEN p.change_date BETWEEN '1-SEP-2013' AND '31-AUG-2014'
+    THEN '2014'
+    WHEN p.change_date BETWEEN '1-SEP-2014' AND '31-AUG-2015'
+    THEN '2015'
+    WHEN p.change_date BETWEEN '1-SEP-2015' AND '31-AUG-2016'
+    THEN '2016'
+    ELSE 'Error'
+  END
+  ||'|||'
+  ||'0'
+  ||'|'
+  ||gra.grade_id
+  ||'|'
+  || '0'
+  ||'|'
+  ||
+  CASE
+    WHEN z.lookup_code IS NOT NULL
+    THEN z.lookup_code
+    ELSE 'U'
+  END
+  ||'|'
+  || '0'
+  ||'|'
+  ||'1|' --seq number (1 or 0?)
+  || '0'
+  ||'||||||||||||||||1||'
+  ||
+  CASE
+    WHEN bas.name = 'Hourly'
+    THEN p.PROPOSED_SALARY_N
+    WHEN bas.name = 'Salaried'
+    THEN (p.PROPOSED_SALARY_N*bas.pay_annualization_factor)
+  END
+  ||'|'
+  || '0'
+  ||'|0' AS "XXXXXXXXXXXXXXXXXXXXXXXXXX"
+FROM hr.per_all_people_f a,
+  hr.per_all_assignments_f b,
+  hr.per_pay_proposals p,
+  HR.PER_JOBS J,
+  hr.hr_locations_all l,
+  hr.hr_all_organization_units g,
+  hr.per_pay_bases bas,
+  APPS.HR_LOOKUPS z,
+  hr.per_grades gra,
+  HR.per_periods_of_service per
+WHERE a.person_id           = b.person_id
+AND l.location_id           = b.location_id
+AND b.grade_id              = gra.grade_id
+AND b.organization_id       = g.organization_id
+AND b.pay_basis_id          = bas.pay_basis_id
+and j.name not in ('CSR...', 'ASM...')
+AND (Z.LOOKUP_TYPE          = 'PROPOSAL_REASON'
+OR Z.LOOKUP_TYPE           IS NULL)
+AND p.proposal_reason       = z.lookup_code (+)
+AND p.ASSIGNMENT_ID         = b.assignment_id
+AND J.JOB_ID                = B.JOB_ID
+AND a.current_employee_flag = 'Y'
+AND b.primary_flag          = 'Y'
+  --and g.type <> 'STORE'
+AND TRUNC(sysdate) BETWEEN a.effective_start_date AND a.effective_end_date
+AND b.effective_end_date =
+  (SELECT MAX(BB.EFFECTIVE_END_DATE)
+  FROM hr.per_all_assignments_f BB
+  WHERE BB.person_id = b.person_id
+  )
+AND p.CHANGE_DATE  = per.date_start
+AND per.person_id  = a.person_id
+AND per.date_start =
+  (SELECT MAX(per2.date_start)
+  FROM hr.per_periods_of_service per2
+  WHERE per2.person_id = a.person_id
+  )
+AND p.CHANGE_DATE =
+  (SELECT MAX(pp.change_date)
+  FROM hr.per_pay_proposals pp
+  WHERE pp.assignment_id = p.assignment_id
+  )
+  --and a.employee_number = '64'
