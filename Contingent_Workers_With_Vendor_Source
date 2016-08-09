@@ -1,0 +1,40 @@
+SELECT peo.npw_number  AS "Cont EIN",
+  ppt.USER_PERSON_TYPE AS "User Type",
+  peo.FULL_NAME        AS "Full Name",
+  peo2.full_name       AS "Supervisor Full Name",
+  peo2.EMPLOYEE_NUMBER AS "Supervisor Employee Number",
+  org.name             AS "Organization",
+  org.type             AS "Org Type",
+  loc.location_code    AS "Location",
+  loc.attribute2       AS "Loc Type",
+  peo.start_date       AS "Hire Date",
+  mat.vendor_id        AS "Vendor ID",
+  ven.vendor_name      AS "Vendor Name"
+FROM hr.PER_PERSON_TYPE_USAGES_F ptu,
+  hr.PER_PERSON_TYPES ppt,
+  hr.per_all_people_f peo,
+  hr.per_all_people_f peo2,
+  hr.per_all_assignments_f mat,
+  hr.hr_locations_all loc,
+  hr.hr_all_organization_units org,
+  apps.po_vendors ven
+WHERE TRUNC(sysdate) BETWEEN ptu.EFFECTIVE_START_DATE AND ptu.EFFECTIVE_END_DATE
+AND TRUNC(sysdate) BETWEEN peo.EFFECTIVE_START_DATE AND peo.EFFECTIVE_END_DATE
+AND ppt.PERSON_TYPE_ID  = ptu.PERSON_TYPE_ID
+AND ptu.PERSON_ID       = peo.PERSON_ID
+AND mat.location_id     = loc.location_id (+)
+AND mat.PERSON_ID       = peo.PERSON_ID
+AND mat.organization_id = org.organization_id (+)
+AND TRUNC(sysdate) BETWEEN mat.effective_start_date AND mat.effective_end_date
+AND ppt.SYSTEM_PERSON_TYPE NOT IN 'PRTN'
+AND mat.supervisor_id           = peo2.person_id (+) --Added (+) outer join to handle null supervisors
+AND (peo2.effective_end_date    =
+  (SELECT MAX(peo3.effective_end_date) --Added max effective end date
+  FROM hr.PER_ALL_PEOPLE_F peo3        --for multiple a records
+  WHERE peo3.person_id = peo2.person_id
+  )
+OR peo2.effective_end_date        IS NULL)
+AND (mat.projected_assignment_end >= TRUNC(sysdate)
+OR mat.projected_assignment_end   IS NULL)
+AND ppt.USER_PERSON_TYPE          IN 'Contingent Worker'
+AND mat.vendor_id                  = ven.vendor_id
