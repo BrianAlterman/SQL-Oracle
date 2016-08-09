@@ -1,0 +1,27 @@
+SELECT 'AuthoriaJobs|784246428|178675716|1.21.110100||'
+  || jobs.job_id
+  || '|'
+  ||
+  CASE
+    WHEN jobs.date_to IS NULL
+    THEN '0'
+    ELSE '1'
+  END
+  || '|'
+  ||jobs.job_id
+  ||'|'
+  ||SUBSTR(jobs.name, 0, LENGTH(name)-3)
+  ||'|'
+  ||look.MEANING
+  ||'|'
+  ||DECODE(jobs.job_information3,'NEX', '0', 'Non-Exempt', 'EX', '1')
+  ||'|'
+  ||jobs.attribute5
+  ||'||||||'
+  ||jobs.name
+  ||'|en_US|||||||||||||||||||||||||||||'
+FROM hr.per_jobs jobs,
+  APPS.HR_LOOKUPS look
+WHERE jobs.name LIKE '%...'
+AND look.LOOKUP_TYPE      = 'US_EEO1_JOB_CATEGORIES'
+AND jobs.job_INFORMATION1 = look.LOOKUP_CODE
