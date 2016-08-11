@@ -1,0 +1,520 @@
+SELECT "Location",
+  "TOTEMP" AS "Total Emp",
+  "Eligible",
+  "PART" AS "401K Participants",
+  CAST(("PART" / "TOTEMP")*100 AS DECIMAL(8,2))
+  || '%' AS "401K Percentage (Tot)",
+  CAST(("PART" / "Eligible")*100 AS DECIMAL(8,2))
+  || '%'  AS "401K Percentage (Elig)",
+  "PARTA" AS "ESPP Participants",
+  CAST(("PARTA" / "TOTEMP")*100 AS DECIMAL(8,2))
+  || '%' AS "ESPP Percentage (Tot)",
+  CAST(("PARTA" / "Eligible")*100 AS DECIMAL(8,2))
+  || '%' AS "ESPP Percentage (Elig)"
+FROM
+  (SELECT 'Corporate'          AS "Location",
+    '2'                        AS "ORD",
+    COUNT(peo.employee_number) AS "Eligible"
+  FROM hr.per_all_people_f peo,
+    hr.per_all_assignments_f mat,
+    hr.hr_all_organization_units org,
+    hr.hr_locations_all loc,
+    (SELECT peoc.employee_number AS "EIDSUB",
+      SUM(
+      CASE
+        WHEN perc.actual_termination_date IS NULL
+        THEN ((to_date(trunc(sysdate))) - perc.date_start)
+        WHEN perc.actual_termination_date > (to_date(trunc(sysdate)))
+        THEN ((to_date(trunc(sysdate)))     - perc.date_start)
+        ELSE (perc.actual_termination_date - perc.date_start)
+      END) AS "TOSSUB"
+    FROM hr.per_all_people_f peoc,
+      hr.per_periods_of_service perc
+    WHERE trunc(sysdate) BETWEEN peoc.effective_start_date AND peoc.effective_end_date
+    AND perc.person_id = peoc.person_id
+    GROUP BY peoc.employee_number
+    )
+  WHERE trunc(sysdate) BETWEEN peo.effective_start_date AND peo.effective_end_date
+  AND trunc(sysdate) BETWEEN mat.effective_start_date AND mat.effective_end_date
+  AND peo.current_employee_flag = 'Y'
+  AND mat.primary_flag          = 'Y'
+  AND mat.employment_category  IN ('PR', 'FR')
+  AND "EIDSUB"                  = peo.employee_number
+  AND "TOSSUB"                  > '90'
+  AND peo.person_id             = mat.person_id
+  AND mat.location_id           = loc.location_id
+  AND mat.organization_id       = org.organization_id
+  AND (org.type                IN ('CORP', 'CORPFLEET')
+  AND org.name NOT LIKE '%Modified%')
+  
+  UNION
+  
+  SELECT 'Stores'              AS "Location",
+    '1'                        AS "ORD",
+    COUNT(peo.employee_number) AS "Eligible"
+  FROM hr.per_all_people_f peo,
+    hr.per_all_assignments_f mat,
+    hr.hr_all_organization_units org,
+    hr.hr_locations_all loc,
+    (SELECT peoc.employee_number AS "EIDSUB",
+      SUM(
+      CASE
+        WHEN perc.actual_termination_date IS NULL
+        THEN ((to_date(trunc(sysdate))) - perc.date_start)
+        WHEN perc.actual_termination_date > (to_date(trunc(sysdate)))
+        THEN ((to_date(trunc(sysdate)))     - perc.date_start)
+        ELSE (perc.actual_termination_date - perc.date_start)
+      END) AS "TOSSUB"
+    FROM hr.per_all_people_f peoc,
+      hr.per_periods_of_service perc
+    WHERE trunc(sysdate) BETWEEN peoc.effective_start_date AND peoc.effective_end_date
+    AND perc.person_id = peoc.person_id
+    GROUP BY peoc.employee_number
+    )
+  WHERE trunc(sysdate) BETWEEN peo.effective_start_date AND peo.effective_end_date
+  AND trunc(sysdate) BETWEEN mat.effective_start_date AND mat.effective_end_date
+  AND peo.current_employee_flag = 'Y'
+  AND mat.primary_flag          = 'Y'
+  AND mat.employment_category  IN ('PR', 'FR')
+  AND "EIDSUB"                  = peo.employee_number
+  AND "TOSSUB"                  > '90'
+  AND peo.person_id             = mat.person_id
+  AND mat.location_id           = loc.location_id
+  AND mat.organization_id       = org.organization_id
+  AND (org.type                IN ('STORE')
+  OR org.name LIKE '%Modified%')
+  
+  UNION
+  
+  SELECT
+    CASE
+      WHEN loc.region_2 = 'SC'
+      THEN 'NC'
+      ELSE loc.region_2
+    END                        AS "Location",
+    '3'                        AS "ORD",
+    COUNT(peo.employee_number) AS "Eligible"
+  FROM hr.per_all_people_f peo,
+    hr.per_all_assignments_f mat,
+    hr.hr_all_organization_units org,
+    hr.hr_locations_all loc,
+    (SELECT peoc.employee_number AS "EIDSUB",
+      SUM(
+      CASE
+        WHEN perc.actual_termination_date IS NULL
+        THEN ((to_date(trunc(sysdate))) - perc.date_start)
+        WHEN perc.actual_termination_date > (to_date(trunc(sysdate)))
+        THEN ((to_date(trunc(sysdate)))     - perc.date_start)
+        ELSE (perc.actual_termination_date - perc.date_start)
+      END) AS "TOSSUB"
+    FROM hr.per_all_people_f peoc,
+      hr.per_periods_of_service perc
+    WHERE trunc(sysdate) BETWEEN peoc.effective_start_date AND peoc.effective_end_date
+    AND perc.person_id = peoc.person_id
+    GROUP BY peoc.employee_number
+    )
+  WHERE trunc(sysdate) BETWEEN peo.effective_start_date AND peo.effective_end_date
+  AND trunc(sysdate) BETWEEN mat.effective_start_date AND mat.effective_end_date
+  AND peo.current_employee_flag = 'Y'
+  AND mat.primary_flag          = 'Y'
+  AND mat.employment_category  IN ('PR', 'FR')
+  AND "EIDSUB"                  = peo.employee_number
+  AND "TOSSUB"                  > '90'
+  AND peo.person_id             = mat.person_id
+  AND mat.location_id           = loc.location_id
+  AND mat.organization_id       = org.organization_id
+  AND org.type                 IN ('DC', 'CORPDC', 'FLEET')
+  GROUP BY
+    CASE
+      WHEN loc.region_2 = 'SC'
+      THEN 'NC'
+      ELSE loc.region_2
+    END
+  
+  UNION
+  
+  SELECT 'Total'               AS "Location",
+    '4'                        AS "ORD",
+    COUNT(peo.employee_number) AS "Eligible"
+  FROM hr.per_all_people_f peo,
+    hr.per_all_assignments_f mat,
+    hr.hr_all_organization_units org,
+    hr.hr_locations_all loc,
+    (SELECT peoc.employee_number AS "EIDSUB",
+      SUM(
+      CASE
+        WHEN perc.actual_termination_date IS NULL
+        THEN ((to_date(trunc(sysdate))) - perc.date_start)
+        WHEN perc.actual_termination_date > (to_date(trunc(sysdate)))
+        THEN ((to_date(trunc(sysdate)))     - perc.date_start)
+        ELSE (perc.actual_termination_date - perc.date_start)
+      END) AS "TOSSUB"
+    FROM hr.per_all_people_f peoc,
+      hr.per_periods_of_service perc
+    WHERE trunc(sysdate) BETWEEN peoc.effective_start_date AND peoc.effective_end_date
+    AND perc.person_id = peoc.person_id
+    GROUP BY peoc.employee_number
+    )
+  WHERE trunc(sysdate) BETWEEN peo.effective_start_date AND peo.effective_end_date
+  AND trunc(sysdate) BETWEEN mat.effective_start_date AND mat.effective_end_date
+  AND peo.current_employee_flag = 'Y'
+  AND mat.primary_flag          = 'Y'
+  AND mat.employment_category  IN ('PR', 'FR')
+  AND "EIDSUB"                  = peo.employee_number
+  AND "TOSSUB"                  > '90'
+  AND peo.person_id             = mat.person_id
+  AND mat.location_id           = loc.location_id
+  AND mat.organization_id       = org.organization_id
+  ),
+  (SELECT 'Stores'             AS "LOC",
+    COUNT(peo.EMPLOYEE_NUMBER) AS "PART"
+  FROM hr.per_all_people_f peo,
+    hr.per_all_assignments_f mat,
+    hr.PAY_ELEMENT_ENTRIES_F pee,
+    hr.PAY_ELEMENT_TYPES_F pet,
+    hr.pay_input_values_f piv,
+    hr.PAY_ELEMENT_ENTRY_VALUES_F peev,
+    HR.HR_LOCATIONS_ALL loc,
+    hr.hr_all_organization_units org
+  WHERE current_employee_flag ='Y'
+  AND peo.person_id           = mat.person_id
+  AND mat.organization_id     = org.organization_id
+  AND pet.element_type_id     = pee.element_type_id
+  AND pee.assignment_id       = mat.assignment_id
+  AND pet.element_type_id     = piv.element_type_id
+  AND piv.input_value_id      = peev.input_value_id
+  AND pee.element_entry_id    = peev.element_entry_id
+  AND trunc(sysdate) BETWEEN peo.effective_start_Date AND peo.effective_end_Date
+  AND trunc(sysdate) BETWEEN mat.effective_start_Date AND mat.effective_end_Date
+  AND trunc(sysdate) BETWEEN pee.effective_start_Date AND pee.effective_end_Date
+  AND trunc(sysdate) BETWEEN pet.effective_start_Date AND pet.effective_end_Date
+  AND piv.name = 'Percentage'
+  AND trunc(sysdate) BETWEEN piv.effective_start_date AND piv.effective_end_Date
+  AND trunc(sysdate) BETWEEN peev.effective_Start_date AND peev.effective_end_Date
+  AND mat.location_id         = loc.location_id
+  AND pet.element_name        = 'FD 401_K'
+  AND peev.effective_end_date > trunc(sysdate)
+  AND (org.type              IN ('STORE')
+  OR org.name LIKE '%Modified%')
+  
+  UNION
+  
+  SELECT 'Corporate'           AS "LOC",
+    COUNT(peo.EMPLOYEE_NUMBER) AS "PART"
+  FROM hr.per_all_people_f peo,
+    hr.per_all_assignments_f mat,
+    hr.PAY_ELEMENT_ENTRIES_F pee,
+    hr.PAY_ELEMENT_TYPES_F pet,
+    hr.pay_input_values_f piv,
+    hr.PAY_ELEMENT_ENTRY_VALUES_F peev,
+    HR.HR_LOCATIONS_ALL loc,
+    hr.hr_all_organization_units org
+  WHERE current_employee_flag ='Y'
+  AND peo.person_id           = mat.person_id
+  AND pet.element_type_id     = pee.element_type_id
+  AND mat.organization_id     = org.organization_id
+  AND pee.assignment_id       = mat.assignment_id
+  AND pet.element_type_id     = piv.element_type_id
+  AND piv.input_value_id      = peev.input_value_id
+  AND pee.element_entry_id    = peev.element_entry_id
+  AND trunc(sysdate) BETWEEN peo.effective_start_Date AND peo.effective_end_Date
+  AND trunc(sysdate) BETWEEN mat.effective_start_Date AND mat.effective_end_Date
+  AND trunc(sysdate) BETWEEN pee.effective_start_Date AND pee.effective_end_Date
+  AND trunc(sysdate) BETWEEN pet.effective_start_Date AND pet.effective_end_Date
+  AND piv.name = 'Percentage'
+  AND trunc(sysdate) BETWEEN piv.effective_start_date AND piv.effective_end_Date
+  AND trunc(sysdate) BETWEEN peev.effective_Start_date AND peev.effective_end_Date
+  AND mat.location_id         = loc.location_id
+  AND pet.element_name        = 'FD 401_K'
+  AND peev.effective_end_date > trunc(sysdate)
+  AND (org.type              IN ('CORP', 'CORPFLEET')
+  AND org.name NOT LIKE '%Modified%')
+  
+  union
+  
+  SELECT 'Total'           AS "LOC",
+    COUNT(peo.EMPLOYEE_NUMBER) AS "PART"
+  FROM hr.per_all_people_f peo,
+    hr.per_all_assignments_f mat,
+    hr.PAY_ELEMENT_ENTRIES_F pee,
+    hr.PAY_ELEMENT_TYPES_F pet,
+    hr.pay_input_values_f piv,
+    hr.PAY_ELEMENT_ENTRY_VALUES_F peev,
+    HR.HR_LOCATIONS_ALL loc,
+    hr.hr_all_organization_units org
+  WHERE current_employee_flag ='Y'
+  AND peo.person_id           = mat.person_id
+  AND pet.element_type_id     = pee.element_type_id
+  AND mat.organization_id     = org.organization_id
+  AND pee.assignment_id       = mat.assignment_id
+  AND pet.element_type_id     = piv.element_type_id
+  AND piv.input_value_id      = peev.input_value_id
+  AND pee.element_entry_id    = peev.element_entry_id
+  AND trunc(sysdate) BETWEEN peo.effective_start_Date AND peo.effective_end_Date
+  AND trunc(sysdate) BETWEEN mat.effective_start_Date AND mat.effective_end_Date
+  AND trunc(sysdate) BETWEEN pee.effective_start_Date AND pee.effective_end_Date
+  AND trunc(sysdate) BETWEEN pet.effective_start_Date AND pet.effective_end_Date
+  AND piv.name = 'Percentage'
+  AND trunc(sysdate) BETWEEN piv.effective_start_date AND piv.effective_end_Date
+  AND trunc(sysdate) BETWEEN peev.effective_Start_date AND peev.effective_end_Date
+  AND mat.location_id         = loc.location_id
+  AND pet.element_name        = 'FD 401_K'
+  AND peev.effective_end_date > trunc(sysdate)
+  
+  UNION
+  
+  SELECT
+    CASE
+      WHEN loc.region_2 = 'SC'
+      THEN 'NC'
+      ELSE loc.region_2
+    END                        AS "LOC",
+    COUNT(peo.employee_number) AS "PART"
+  FROM hr.per_all_people_f peo,
+    hr.per_all_assignments_f mat,
+    hr.PAY_ELEMENT_ENTRIES_F pee,
+    hr.PAY_ELEMENT_TYPES_F pet,
+    hr.pay_input_values_f piv,
+    hr.PAY_ELEMENT_ENTRY_VALUES_F peev,
+    HR.HR_LOCATIONS_ALL loc,
+    hr.hr_all_organization_units org
+  WHERE current_employee_flag ='Y'
+  AND peo.person_id           = mat.person_id
+  AND pet.element_type_id     = pee.element_type_id
+  AND mat.organization_id     = org.organization_id
+  AND pee.assignment_id       = mat.assignment_id
+  AND pet.element_type_id     = piv.element_type_id
+  AND piv.input_value_id      = peev.input_value_id
+  AND pee.element_entry_id    = peev.element_entry_id
+  AND trunc(sysdate) BETWEEN peo.effective_start_Date AND peo.effective_end_Date
+  AND trunc(sysdate) BETWEEN mat.effective_start_Date AND mat.effective_end_Date
+  AND trunc(sysdate) BETWEEN pee.effective_start_Date AND pee.effective_end_Date
+  AND trunc(sysdate) BETWEEN pet.effective_start_Date AND pet.effective_end_Date
+  AND piv.name = 'Percentage'
+  AND trunc(sysdate) BETWEEN piv.effective_start_date AND piv.effective_end_Date
+  AND trunc(sysdate) BETWEEN peev.effective_Start_date AND peev.effective_end_Date
+  AND mat.location_id         = loc.location_id
+  AND pet.element_name        = 'FD 401_K'
+  AND peev.effective_end_date > trunc(sysdate)
+  AND org.type               IN ('DC', 'CORPDC', 'FLEET')
+  GROUP BY
+    CASE
+      WHEN loc.region_2 = 'SC'
+      THEN 'NC'
+      ELSE loc.region_2
+    END
+  ),
+  (SELECT 'Stores'            AS "LOCT",
+    COUNT(pe.employee_number) AS "TOTEMP"
+  FROM hr.per_all_people_f pe,
+    hr.per_all_assignments_f ma,
+    hr.hr_all_organization_units og
+  WHERE trunc(sysdate) BETWEEN pe.effective_start_date AND pe.effective_end_date
+  AND trunc(sysdate) BETWEEN ma.effective_start_date AND ma.effective_end_date
+  AND pe.current_employee_flag = 'Y'
+  AND ma.primary_flag          = 'Y'
+  AND ma.person_id             = pe.person_id
+  AND ma.organization_id       = og.organization_id
+  AND (og.type                IN ('STORE')
+  OR og.name LIKE '%Modified%')
+  
+  UNION
+  
+  SELECT 'Corporate'          AS "LOCT",
+    COUNT(pe.employee_number) AS "TOTEMP"
+  FROM hr.per_all_people_f pe,
+    hr.per_all_assignments_f ma,
+    hr.hr_all_organization_units og
+  WHERE trunc(sysdate) BETWEEN pe.effective_start_date AND pe.effective_end_date
+  AND trunc(sysdate) BETWEEN ma.effective_start_date AND ma.effective_end_date
+  AND pe.current_employee_flag = 'Y'
+  AND ma.primary_flag          = 'Y'
+  AND ma.person_id             = pe.person_id
+  AND ma.organization_id       = og.organization_id
+  AND (og.type                IN ('CORP', 'CORPFLEET')
+  AND og.name NOT LIKE '%Modified%')
+  
+  UNION
+  
+  SELECT 'Total'              AS "LOCT",
+    COUNT(pe.employee_number) AS "TOTEMP"
+  FROM hr.per_all_people_f pe,
+    hr.per_all_assignments_f ma,
+    hr.hr_all_organization_units og
+  WHERE trunc(sysdate) BETWEEN pe.effective_start_date AND pe.effective_end_date
+  AND trunc(sysdate) BETWEEN ma.effective_start_date AND ma.effective_end_date
+  AND pe.current_employee_flag = 'Y'
+  AND ma.primary_flag          = 'Y'
+  AND ma.person_id             = pe.person_id
+  AND ma.organization_id       = og.organization_id
+  
+  UNION
+  
+  SELECT
+    CASE
+      WHEN lo.region_2 = 'SC'
+      THEN 'NC'
+      ELSE lo.region_2
+    END                       AS "LOCT",
+    COUNT(pe.employee_number) AS "TOTEMP"
+  FROM hr.per_all_people_f pe,
+    hr.per_all_assignments_f ma,
+    hr.hr_all_organization_units og,
+    hr.hr_locations_all lo
+  WHERE trunc(sysdate) BETWEEN pe.effective_start_date AND pe.effective_end_date
+  AND trunc(sysdate) BETWEEN ma.effective_start_date AND ma.effective_end_date
+  AND pe.current_employee_flag = 'Y'
+  AND ma.primary_flag          = 'Y'
+  AND lo.location_id           = ma.location_id
+  AND ma.person_id             = pe.person_id
+  AND ma.organization_id       = og.organization_id
+  AND og.type                 IN ('DC', 'CORPDC', 'FLEET')
+  GROUP BY
+    CASE
+      WHEN lo.region_2 = 'SC'
+      THEN 'NC'
+      ELSE lo.region_2
+    END
+  ),
+  (SELECT 'Stores'             AS "LOCA",
+    COUNT(peo.EMPLOYEE_NUMBER) AS "PARTA"
+  FROM hr.per_all_people_f peo,
+    hr.per_all_assignments_f mat,
+    hr.PAY_ELEMENT_ENTRIES_F pee,
+    hr.PAY_ELEMENT_TYPES_F pet,
+    hr.pay_input_values_f piv,
+    hr.PAY_ELEMENT_ENTRY_VALUES_F peev,
+    HR.HR_LOCATIONS_ALL loc,
+    hr.hr_all_organization_units org
+  WHERE current_employee_flag ='Y'
+  AND peo.person_id           = mat.person_id
+  AND mat.organization_id     = org.organization_id
+  AND pet.element_type_id     = pee.element_type_id
+  AND pee.assignment_id       = mat.assignment_id
+  AND pet.element_type_id     = piv.element_type_id
+  AND piv.input_value_id      = peev.input_value_id
+  AND pee.element_entry_id    = peev.element_entry_id
+  AND trunc(sysdate) BETWEEN peo.effective_start_Date AND peo.effective_end_Date
+  AND trunc(sysdate) BETWEEN mat.effective_start_Date AND mat.effective_end_Date
+  AND trunc(sysdate) BETWEEN pee.effective_start_Date AND pee.effective_end_Date
+  AND trunc(sysdate) BETWEEN pet.effective_start_Date AND pet.effective_end_Date
+  AND piv.name = 'Amount'
+  AND trunc(sysdate) BETWEEN piv.effective_start_date AND piv.effective_end_Date
+  AND trunc(sysdate) BETWEEN peev.effective_Start_date AND peev.effective_end_Date
+  AND mat.location_id         = loc.location_id
+  AND pet.element_name        = 'FD ESPP1'
+  AND peev.effective_end_date > trunc(sysdate)
+  AND (org.type              IN ('STORE')
+  OR org.name LIKE '%Modified%')
+  
+  UNION
+  
+  SELECT 'Corporate'           AS "LOCA",
+    COUNT(peo.EMPLOYEE_NUMBER) AS "PARTA"
+  FROM hr.per_all_people_f peo,
+    hr.per_all_assignments_f mat,
+    hr.PAY_ELEMENT_ENTRIES_F pee,
+    hr.PAY_ELEMENT_TYPES_F pet,
+    hr.pay_input_values_f piv,
+    hr.PAY_ELEMENT_ENTRY_VALUES_F peev,
+    HR.HR_LOCATIONS_ALL loc,
+    hr.hr_all_organization_units org
+  WHERE current_employee_flag ='Y'
+  AND peo.person_id           = mat.person_id
+  AND pet.element_type_id     = pee.element_type_id
+  AND mat.organization_id     = org.organization_id
+  AND pee.assignment_id       = mat.assignment_id
+  AND pet.element_type_id     = piv.element_type_id
+  AND piv.input_value_id      = peev.input_value_id
+  AND pee.element_entry_id    = peev.element_entry_id
+  AND trunc(sysdate) BETWEEN peo.effective_start_Date AND peo.effective_end_Date
+  AND trunc(sysdate) BETWEEN mat.effective_start_Date AND mat.effective_end_Date
+  AND trunc(sysdate) BETWEEN pee.effective_start_Date AND pee.effective_end_Date
+  AND trunc(sysdate) BETWEEN pet.effective_start_Date AND pet.effective_end_Date
+  AND piv.name = 'Amount'
+  AND trunc(sysdate) BETWEEN piv.effective_start_date AND piv.effective_end_Date
+  AND trunc(sysdate) BETWEEN peev.effective_Start_date AND peev.effective_end_Date
+  AND mat.location_id         = loc.location_id
+  AND pet.element_name        = 'FD ESPP1'
+  AND peev.effective_end_date > trunc(sysdate)
+  AND (org.type              IN ('CORP', 'CORPFLEET')
+  AND org.name NOT LIKE '%Modified%')
+  
+  UNION
+  
+  SELECT
+    CASE
+      WHEN loc.region_2 = 'SC'
+      THEN 'NC'
+      ELSE loc.region_2
+    END                        AS "LOCA",
+    COUNT(peo.employee_number) AS "PARTA"
+  FROM hr.per_all_people_f peo,
+    hr.per_all_assignments_f mat,
+    hr.PAY_ELEMENT_ENTRIES_F pee,
+    hr.PAY_ELEMENT_TYPES_F pet,
+    hr.pay_input_values_f piv,
+    hr.PAY_ELEMENT_ENTRY_VALUES_F peev,
+    HR.HR_LOCATIONS_ALL loc,
+    hr.hr_all_organization_units org
+  WHERE current_employee_flag ='Y'
+  AND peo.person_id           = mat.person_id
+  AND pet.element_type_id     = pee.element_type_id
+  AND mat.organization_id     = org.organization_id
+  AND pee.assignment_id       = mat.assignment_id
+  AND pet.element_type_id     = piv.element_type_id
+  AND piv.input_value_id      = peev.input_value_id
+  AND pee.element_entry_id    = peev.element_entry_id
+  AND trunc(sysdate) BETWEEN peo.effective_start_Date AND peo.effective_end_Date
+  AND trunc(sysdate) BETWEEN mat.effective_start_Date AND mat.effective_end_Date
+  AND trunc(sysdate) BETWEEN pee.effective_start_Date AND pee.effective_end_Date
+  AND trunc(sysdate) BETWEEN pet.effective_start_Date AND pet.effective_end_Date
+  AND piv.name = 'Amount'
+  AND trunc(sysdate) BETWEEN piv.effective_start_date AND piv.effective_end_Date
+  AND trunc(sysdate) BETWEEN peev.effective_Start_date AND peev.effective_end_Date
+  AND mat.location_id         = loc.location_id
+  AND pet.element_name        = 'FD ESPP1'
+  AND peev.effective_end_date > trunc(sysdate)
+  AND org.type               IN ('DC', 'CORPDC', 'FLEET')
+  GROUP BY
+    CASE
+      WHEN loc.region_2 = 'SC'
+      THEN 'NC'
+      ELSE loc.region_2
+    END
+  
+  UNION
+  
+  SELECT 'Total'               AS "LOCA",
+    COUNT(peo.EMPLOYEE_NUMBER) AS "PARTA"
+  FROM hr.per_all_people_f peo,
+    hr.per_all_assignments_f mat,
+    hr.PAY_ELEMENT_ENTRIES_F pee,
+    hr.PAY_ELEMENT_TYPES_F pet,
+    hr.pay_input_values_f piv,
+    hr.PAY_ELEMENT_ENTRY_VALUES_F peev,
+    HR.HR_LOCATIONS_ALL loc,
+    hr.hr_all_organization_units org
+  WHERE current_employee_flag ='Y'
+  AND peo.person_id           = mat.person_id
+  AND pet.element_type_id     = pee.element_type_id
+  AND mat.organization_id     = org.organization_id
+  AND pee.assignment_id       = mat.assignment_id
+  AND pet.element_type_id     = piv.element_type_id
+  AND piv.input_value_id      = peev.input_value_id
+  AND pee.element_entry_id    = peev.element_entry_id
+  AND trunc(sysdate) BETWEEN peo.effective_start_Date AND peo.effective_end_Date
+  AND trunc(sysdate) BETWEEN mat.effective_start_Date AND mat.effective_end_Date
+  AND trunc(sysdate) BETWEEN pee.effective_start_Date AND pee.effective_end_Date
+  AND trunc(sysdate) BETWEEN pet.effective_start_Date AND pet.effective_end_Date
+  AND piv.name = 'Amount'
+  AND trunc(sysdate) BETWEEN piv.effective_start_date AND piv.effective_end_Date
+  AND trunc(sysdate) BETWEEN peev.effective_Start_date AND peev.effective_end_Date
+  AND mat.location_id         = loc.location_id
+  AND pet.element_name        = 'FD ESPP1'
+  AND peev.effective_end_date > trunc(sysdate)
+  )
+WHERE "LOC" = "Location"
+AND "LOCA"  = "Location"
+AND "LOCT"  = "Location"
+ORDER BY "ORD"
