@@ -1,0 +1,25 @@
+SELECT peo.employee_number AS "ECI_EmpXrefcode",
+  adr.telephone_Number_1   AS "ECI_ContactInformationTypeXrefCode",
+  adr.date_from            AS "ECI_EffectiveStart",
+  NULL                     AS "ECI_EffectiveEnd",
+  NULL                     AS "ECI_CountryCode",
+  NULL                     AS "ECI_ContactNumber",
+  NULL                     AS "ECI_Extension",
+  NULL                     AS "ECI_IsForSystemCommunication",
+  NULL                     AS "ECI_IsUnlisted",
+  NULL                     AS "ECI_ElectronicAddress",
+  NULL                     AS "ECI_IsVerified"
+FROM hr.per_all_people_f peo,
+  hr.per_all_assignments_f mat,
+  hr.hr_locations_all loc,
+  hr.per_addresses adr,
+  hr.per_periods_of_service per
+WHERE TRUNC(sysdate) BETWEEN peo.effective_start_date AND peo.EFFECTIVE_END_DATE
+AND TRUNC(sysdate) BETWEEN mat.effective_start_date AND mat.EFFECTIVE_END_DATE
+AND peo.person_id             = mat.person_id
+AND per.period_of_service_id  = mat.period_of_service_id
+AND mat.location_id           = loc.location_id
+AND adr.person_id             = peo.person_id
+AND peo.CURRENT_EMPLOYEE_FLAG = 'Y'
+AND loc.attribute14           = 'Y'
+AND adr.date_to              IS NULL
