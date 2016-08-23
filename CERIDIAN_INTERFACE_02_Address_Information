@@ -1,0 +1,26 @@
+SELECT peo.employee_number AS "ADD_EmpXrefcode",
+  'PrimaryResidence'       AS "ADD_ContactInformationTypeXrefCode",
+  adr.date_from            AS "ADD_EffectiveStart",
+  NULL                     AS "ADD_EffectiveEnd",
+  adr.address_line1        AS "ADD_Address1",
+  adr.address_line2        AS "ADD_Address2",
+  adr.address_line3        AS "ADD_Address3",
+  adr.region_1             AS "ADD_County",
+  adr.town_or_city         AS "ADD_City",
+  adr.region_2             AS "ADD_StateCode",
+  'USA'                    AS "ADD_CountryCode",
+  adr.postal_code          AS "ADD_PostalCode"
+FROM hr.per_all_people_f peo,
+  hr.per_all_assignments_f mat,
+  hr.hr_locations_all loc,
+  hr.per_addresses adr,
+  hr.per_periods_of_service per
+WHERE TRUNC(sysdate) BETWEEN peo.effective_start_date AND peo.EFFECTIVE_END_DATE
+AND TRUNC(sysdate) BETWEEN mat.effective_start_date AND mat.EFFECTIVE_END_DATE
+AND peo.person_id             = mat.person_id
+AND per.period_of_service_id  = mat.period_of_service_id
+AND mat.location_id           = loc.location_id
+AND adr.person_id             = peo.person_id
+AND peo.CURRENT_EMPLOYEE_FLAG = 'Y'
+AND loc.attribute14 = 'Y'
+AND adr.date_to        IS NULL
