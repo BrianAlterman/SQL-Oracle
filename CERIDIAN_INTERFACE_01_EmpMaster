@@ -1,0 +1,285 @@
+SELECT peo.employee_number                            AS "EMP_EmpXrefcode",
+  peo.employee_number                                 AS "EMP_EmployeeNumber",
+  NULL                                                AS "EMP_Title",
+  peo.first_name                                      AS "EMP_FirstNamee",
+  peo.middle_names                                    AS "EMP_MiddleName",
+  peo.last_name                                       AS "EMP_LastName",
+  NULL                                                AS "EMP_CommonName",
+  peo.suffix                                          AS "EMP_Suffix",
+  peo.sex                                             AS "EMP_Gender",
+  TO_CHAR(peo.date_of_Birth, 'YYYY-MM-dd')            AS "EMP_BirthDate",
+  to_number(REPLACE(peo.national_identifier, '-','')) AS "EMP_SocialSecurityNumber",
+  NULL                                                AS "EMP_SSNExpiryDate",
+  NULL                                                AS "EMP_CitizenshipTypeXrefCode",
+  '2015-11-01'                                        AS "EMP_OriginalHireDate",
+  '2015-11-01'                                        AS "EMP_HireDate",
+  '2015-11-01'                                        AS "EMP_StartDate",
+  NULL                                                AS "EMP_SeniorityDate", --Investigate
+  per.actual_termination_date                         AS "EMP_TerminationDate",
+  NULL                                                AS "EMP_BadgerNumber",
+  NULL                                                AS "EMP_LoginId",
+  NULL                                                AS "EMP_Password",
+  NULL                                                AS "EMP_FederationId",
+  NULL                                                AS "EMP_EligibleForRehire",
+  CASE
+    WHEN peo.marital_status = 'M'
+    THEN 'Married'
+    WHEN peo.marital_status = 'D'
+    THEN 'Divorced'
+    WHEN peo.marital_status = 'S'
+    THEN 'Single'
+    WHEN peo.marital_status = 'W'
+    THEN 'Widowed'
+    WHEN peo.marital_status = 'DP'
+    THEN 'Domestic Partner'
+  END                          AS "EMP_MaritalStatusXrefCode",
+  NULL                         AS "EMP_IsHCE",
+  "Supervisor Employee Number" AS "EMP_ManagerXrefcode",
+  "Supervisor Full Name"       AS "EMP_ManagerFullName",
+  "Race"                       AS "EMP_EthnicityXrefCode",
+  NULL                         AS "ManagerEthnicityCode",
+  NULL                         AS "EMP_VeteranStatusXrefCode",
+  NULL                         AS "EMP_VeteranStatusXrefCode",
+  NULL                         AS "EMP_RegisteredDisabled",
+  NULL                         AS "EMP_UnionXrefCode",
+  NULL                         AS "EMP_UnionMembershipDate",
+  NULL                         AS "EMP_TobaccoUser",
+  NULL                         AS "EMP_DateLastSmoked",
+  "Federal Filing Status"      AS "EMP_USFed_FilingStatusCode",
+  NULL                         AS "EMP_USFed_NumberOfAllowances",
+  NULL                         AS "EMP_USFed_AdditionalTaxAmount",
+  NULL                         AS "EMP_USFed_IsTaxExempt",
+  NULL                         AS "EMP_USState_FilingStatusCode", --Need to add
+  NULL                         AS "EMP_USState_NumberOfAllowances",
+  NULL                         AS "EMP_USState_DependentAllowances",
+  NULL                         AS "EMP_USState_PersonalAllowances",
+  NULL                         AS "EMP_USState_AdditionalTaxAmount",
+  NULL                         AS "EMP_USState_IsTaxExempt",
+  NULL                         AS "EMP_USState_AlternateCalculationCode",
+  NULL                         AS "EMP_USState_ExemptionAmt",
+  NULL                         AS "EMP_USState_StateCode",
+  NULL                         AS "EMP_CANFed_TotalClaimAmount",
+  NULL                         AS "EMP_CANFed_AdditionalAmount",
+  NULL                         AS "EMP_CANProv_TotalClaimAmount",
+  NULL                         AS "EMP_CANProv_AdditionalAmount",
+  NULL                         AS "EMP_CANProv_ProvinceCode",
+  NULL                         AS "EMP_CANProv_HasQuebecHealthContributionExemption",
+  NULL                         AS "EMP_CANRegisteredDisabled",
+  NULL                         AS "EMP_CANIsVisibleMinority",
+  NULL                         AS "EMP_CANIsAboriginal",
+  Z.MEANING "EEO Category"     AS "EEO Code"
+FROM hr.per_all_people_f peo,
+  applsys.fnd_lookup_values Z,
+  hr.per_all_assignments_f mat,
+  hr.hr_all_organization_units org,
+  hr.per_jobs jobs,
+  hr.hr_locations_all loc,
+  hr.per_periods_of_service per,
+  (SELECT a.EMPLOYEE_NUMBER AS "EINFEDMAT",
+    z.meaning               AS "Federal Filing Status"
+  FROM hr.per_all_people_f a,
+    hr.per_all_assignments_f b,
+    HR.PER_PERIODS_OF_SERVICE C,
+    hr.per_jobs j,
+    hr.per_addresses m,
+    hr.PAY_US_EMP_FED_TAX_RULES_F v,
+    hr.hr_all_organization_units g,
+    hr.hr_locations_all l ,
+    hr.per_pay_proposals p,
+    hr.PER_ASSIGNMENT_STATUS_TYPES t,
+    hr.per_pay_bases f,
+    APPS.HR_LOOKUPS Z
+  WHERE TRUNC(sysdate) BETWEEN a.effective_start_date AND a.effective_end_date
+  AND b.effective_end_date =
+    (SELECT MAX(BB.EFFECTIVE_END_DATE)
+    FROM hr.per_all_assignments_f BB
+    WHERE BB.person_id = b.person_id
+    )
+  AND m.PERSON_ID    = a.person_id
+  AND m.date_to     IS NULL
+  AND M.primary_flag = 'Y'
+  AND a.person_id    = b.person_id
+  AND TRUNC(sysdate) BETWEEN v.effective_start_date AND v.effective_end_date
+  AND b.assignment_id             = v.ASSIGNMENT_ID
+  AND B.ASSIGNMENT_STATUS_TYPE_ID = t.ASSIGNMENT_STATUS_TYPE_ID
+  AND l.location_id               = b.location_id
+  AND b.pay_basis_id              = f.pay_basis_id
+  AND l.attribute14               = 'Y'
+  AND p.CHANGE_DATE               =
+    (SELECT MAX(pp.change_date)
+    FROM hr.per_pay_proposals pp
+    WHERE pp.assignment_id = p.assignment_id
+    )
+  AND b.assignment_id      = p.assignment_id
+  AND a.PERSON_ID          = c.PERSON_ID
+  AND Z.LOOKUP_TYPE        = 'US_FIT_FILING_STATUS'
+  AND v.filing_status_code = z.lookup_code
+  AND b.JOB_ID             = j.JOB_ID
+  AND b.organization_id    = g.organization_id
+  AND c.DATE_START         =
+    (SELECT MAX(cc.date_start)
+    FROM hr.per_periods_of_service cc
+    WHERE c.person_id = cc.person_id
+    )
+  AND a.current_employee_flag = 'Y'
+  AND b.primary_flag          = 'Y'
+  ),
+  (SELECT a.employee_number AS "EINRACE",
+    CASE
+      WHEN Y.pei_information6 IN 'Y'
+      AND Y.pei_information5  IN 'N'
+      AND Y.pei_information4  IN 'N'
+      AND Y.pei_information3  IN 'N'
+      AND Y.pei_information2  IN 'N'
+      AND Y.pei_information1  IN 'N'
+      THEN 'White (Not Hispanic or Latino)'
+      WHEN Y.pei_information6 IN 'N'
+      AND Y.pei_information5  IN 'Y'
+      AND Y.pei_information4  IN 'N'
+      AND Y.pei_information3  IN 'N'
+      AND Y.pei_information2  IN 'N'
+      AND Y.pei_information1  IN 'N'
+      THEN 'Native Hawaiian/Other Pacific Islander(Not Hispanic/Latino)'
+      WHEN Y.pei_information6 IN 'N'
+      AND Y.pei_information5  IN 'N'
+      AND Y.pei_information4  IN 'Y'
+      AND Y.pei_information3  IN 'N'
+      AND Y.pei_information2  IN 'N'
+      AND Y.pei_information1  IN 'N'
+      THEN 'Black or African American (Not Hispanic or Latino)'
+      WHEN Y.pei_information6 IN 'N'
+      AND Y.pei_information5  IN 'N'
+      AND Y.pei_information4  IN 'N'
+      AND Y.pei_information3  IN 'Y'
+      AND Y.pei_information2  IN 'N'
+      AND Y.pei_information1  IN 'N'
+      THEN 'Asian (Not Hispanic or Latino)'
+      WHEN Y.pei_information6 IN 'N'
+      AND Y.pei_information5  IN 'N'
+      AND Y.pei_information4  IN 'N'
+      AND Y.pei_information3  IN 'N'
+      AND Y.pei_information2  IN 'Y'
+      AND Y.pei_information1  IN 'N'
+      THEN 'American Indian or Alaska Native (Not Hispanic or Latino)'
+      WHEN Y.pei_information6 IN 'N'
+      AND Y.pei_information5  IN 'N'
+      AND Y.pei_information4  IN 'N'
+      AND Y.pei_information3  IN 'N'
+      AND Y.pei_information2  IN 'N'
+      AND Y.pei_information1  IN 'N'
+      AND Y.pei_information7  IN 'N'
+      THEN 'Null'
+      WHEN Y.pei_information6 IS NULL
+      AND Y.pei_information5  IS NULL
+      AND Y.pei_information4  IS NULL
+      AND Y.pei_information3  IS NULL
+      AND Y.pei_information2  IS NULL
+      AND Y.pei_information1  IS NULL
+      AND Y.pei_information7  IS NULL
+      THEN 'Null'
+      WHEN Y.pei_information1 IN 'Y'
+      THEN 'Hispanic or Latino'
+      ELSE 'Two or More Races (Not Hispanic or Latino)'
+    END "Race"
+  FROM hr.per_people_extra_info y,
+    hr.per_all_people_f a
+  WHERE TRUNC(sysdate) BETWEEN a.effective_start_date AND a.effective_end_date
+  AND (y.information_type IN 'US_ETHNIC_ORIGIN'
+  OR y.information_type   IS NULL)
+  AND a.person_id          = y.person_id (+)
+  ),
+  (SELECT a.EMPLOYEE_NUMBER AS "Employee Number",
+    a2.full_name            AS "Supervisor Full Name",
+    a2.EMPLOYEE_NUMBER      AS "Supervisor Employee Number"
+  FROM hr.per_all_people_f a,
+    hr.per_all_assignments_f b,
+    hr.per_all_people_f a2,
+    hr.hr_all_organization_units G,
+    hr.per_jobs J,
+    hr.per_periods_of_service c
+  WHERE a.person_id     = b.person_id
+  AND a.person_id       = c.person_id
+  AND b.organization_id = G.organization_id
+  AND c.DATE_START      =
+    (SELECT MAX(cc.date_start)
+    FROM hr.per_periods_of_service cc
+    WHERE c.person_id = cc.person_id
+    )
+  AND J.JOB_ID                 = b.JOB_ID
+  AND a.CURRENT_EMPLOYEE_FLAG IN 'Y'
+  AND b.primary_flag           = 'Y'
+  AND TRUNC(sysdate) BETWEEN a.effective_start_date AND a.effective_end_date
+  AND TRUNC(sysdate) BETWEEN b.effective_start_date AND b.effective_end_date
+  AND b.supervisor_id        = a2.person_id
+  AND (a2.effective_end_date =
+    (SELECT MAX(a3.effective_end_date)
+    FROM hr.PER_ALL_PEOPLE_F a3
+    WHERE a3.person_id = a2.person_id
+    ) )
+  UNION
+  SELECT a.EMPLOYEE_NUMBER AS "Employee Number",
+    a2.full_name           AS "Supervisor Full Name",
+    a2.EMPLOYEE_NUMBER     AS "Supervisor Employee Number"
+  FROM hr.per_all_people_f a,
+    hr.per_all_assignments_f b,
+    hr.per_all_people_f a2,
+    hr.per_all_assignments_f b2,
+    hr.per_jobs J2,
+    hr.hr_all_organization_units G,
+    hr.per_jobs J,
+    hr.per_periods_of_service c,
+    hr.PER_pos_STRUCTURE_ELEMENTS pose,
+    hr.PER_pos_STRUCTURE_VERSIONS posv,
+    HR.PER_position_STRUCTURES pos,
+    hr.hr_all_positions_f parent,
+    hr.hr_all_positions_f sub
+  WHERE a.person_id     = b.person_id
+  AND a2.person_id      = b2.person_id
+  AND J2.JOB_ID         = b2.JOB_ID
+  AND a.person_id       = c.person_id
+  AND b.organization_id = G.organization_id
+  AND c.DATE_START      =
+    (SELECT MAX(cc.date_start)
+    FROM hr.per_periods_of_service cc
+    WHERE c.person_id = cc.person_id
+    )
+  AND J.JOB_ID                  = b.JOB_ID
+  AND a.CURRENT_EMPLOYEE_FLAG  IN 'Y'
+  AND b.primary_flag            = 'Y'
+  AND a2.CURRENT_EMPLOYEE_FLAG IN 'Y'
+  AND b2.primary_flag           = 'Y'
+  AND TRUNC(sysdate) BETWEEN a.effective_start_date AND a.effective_end_date
+  AND TRUNC(sysdate) BETWEEN b.effective_start_date AND b.effective_end_date
+  AND pose.pos_STRUCTURE_VERSION_ID = posv.pos_STRUCTURE_VERSION_ID
+  AND posv.position_STRUCTURE_ID    = pos.position_STRUCTURE_ID
+  AND pos.name                     IN ('FD Primary Position')
+  AND parent.position_id            = pose.parent_position_id
+  AND sub.position_id               = pose.subordinate_position_id
+  AND parent.position_id            = b2.position_id
+  AND sub.position_id               = b.position_id
+  AND TRUNC(sysdate) BETWEEN a2.effective_start_date AND a2.effective_end_date
+  AND TRUNC(sysdate) BETWEEN b2.effective_start_date AND b2.effective_end_date
+  AND TRUNC(sysdate) BETWEEN parent.effective_start_date AND parent.effective_end_date
+  AND TRUNC(sysdate) BETWEEN sub.effective_start_date AND sub.effective_end_date
+  )
+WHERE TRUNC(sysdate) BETWEEN peo.effective_start_date AND peo.effective_end_date
+AND TRUNC(sysdate) BETWEEN mat.effective_start_date AND mat.effective_end_date
+AND peo.person_id             = mat.person_id
+AND per.person_id             = peo.person_id
+AND mat.organization_id       = org.organization_id
+AND loc.location_id           = mat.location_id
+AND mat.job_id                = jobs.job_id
+AND peo.current_employee_flag = 'Y'
+AND mat.primary_flag          = 'Y'
+AND per.date_start            =
+  (SELECT MAX(per2.date_start)
+  FROM hr.per_periods_of_service per2
+  WHERE per2.person_id = peo.person_id
+  )
+AND loc.attribute14       = 'Y'
+AND peo.employee_number   = "Employee Number" (+)
+AND peo.employee_number   = "EINRACE" (+)
+AND peo.employee_number   = "EINFEDMAT" (+)
+AND (Z.LOOKUP_TYPE        = 'US_EEO1_JOB_CATEGORIES'
+OR Z.LOOKUP_TYPE         IS NULL)
+AND jobs.job_INFORMATION1 = Z.LOOKUP_CODE (+)
