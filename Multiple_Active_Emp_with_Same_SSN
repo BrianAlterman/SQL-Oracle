@@ -1,0 +1,14 @@
+SELECT peo.full_name         AS "Name 1",
+  peo.employee_number        AS "EIN 1",
+  peo.current_employee_flag  AS "Active 1",
+  peo2.full_name             AS "Name 2",
+  peo2.employee_number       AS "EIN 2",
+  peo2.current_employee_flag AS "Active 2"
+FROM hr.per_all_people_f peo,
+  hr.per_all_people_f peo2
+WHERE peo.national_identifier = peo2.national_identifier
+AND peo.employee_number      <> peo2.employee_number
+AND TRUNC(sysdate) BETWEEN peo.effective_start_date AND peo.effective_end_date
+AND TRUNC(sysdate) BETWEEN peo2.effective_start_date AND peo2.effective_end_date
+AND peo.current_employee_flag  ='Y'
+AND peo2.current_employee_flag = 'Y'
