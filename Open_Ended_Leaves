@@ -1,0 +1,31 @@
+SELECT hie.DIVISION      AS "Division",
+  hie.REGION             AS "Region",
+  hie.DISTRICT           AS "District",
+  peo.full_name          AS "Full Name",
+  peo.EMPLOYEE_NUMBER    AS "EIN",
+  loc.LOCATION_CODE      AS "Location",
+  jobs.name              AS "Job",
+  paa.DATE_START         AS "Date Start",
+  paa.DATE_PROJECTED_END AS "Proj End Date",
+  paa.DATE_END           AS "Date End"
+FROM HR.PER_ALL_PEOPLE_F peo,
+  HR.PER_ALL_ASSIGNMENTS_F mat,
+  HR.PER_ABSENCE_ATTENDANCES paa,
+  apps.FDV_STORE_ORG_HIERARCHY hie,
+  hr.HR_LOCATIONS_ALL loc,
+  hr.per_jobs jobs
+WHERE peo.PERSON_ID = mat.PERSON_ID
+AND mat.PERSON_ID   = paa.PERSON_ID
+AND jobs.job_id     = mat.job_id
+AND loc.LOCATION_ID = mat.LOCATION_ID
+AND hie.STORE_ID    = loc.ATTRIBUTE3
+AND loc.ATTRIBUTE2 IN 'Store'
+AND TRUNC(SYSDATE) BETWEEN peo.EFFECTIVE_START_DATE AND peo.EFFECTIVE_END_DATE
+AND TRUNC(SYSDATE) BETWEEN mat.EFFECTIVE_START_DATE AND mat.EFFECTIVE_END_DATE
+AND peo.CURRENT_EMPLOYEE_FLAG = 'Y'
+AND mat.PRIMARY_FLAG          = 'Y'
+AND paa.DATE_END             IS NULL
+AND paa.DATE_START           IS NOT NULL
+ORDER BY hie.DIVISION,
+  hie.REGION,
+  hie.DISTRICT
