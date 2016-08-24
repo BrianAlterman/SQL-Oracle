@@ -1,0 +1,68 @@
+SELECT parent.name "Parent Position",
+  "Parent EIN",
+  "Parent Name",
+  "PRegion",
+  "PGroup",
+  sub.name "Child Position",
+  "Child EIN",
+  "Child Name",
+  "CRegion",
+  "CGroup"
+FROM hr.PER_pos_STRUCTURE_ELEMENTS pose,
+  hr.PER_pos_STRUCTURE_VERSIONS posv,
+  HR.PER_position_STRUCTURES pos,
+  hr.hr_all_positions_f parent,
+  hr.hr_all_positions_f sub,
+  (SELECT peo.full_name AS "Child Name",
+    peo.employee_number AS "Child EIN",
+    mat.position_id     AS "MatCHPos",
+    SUBSTR(name, 5,3)   AS "CHOrg"
+  FROM hr.per_all_people_f peo,
+    hr.per_all_assignments_f mat,
+    hr.hr_all_organization_units org
+  WHERE TRUNC(sysdate) BETWEEN peo.effective_start_date AND peo.effective_end_date
+  AND TRUNC(sysdate) BETWEEN mat.effective_start_date AND mat.effective_end_date
+  AND peo.person_id             = mat.person_id
+  AND mat.organization_id       = org.organization_id
+  AND mat.primary_flag          = 'Y'
+  AND peo.current_employee_flag = 'Y'
+  ),
+  (SELECT peo.full_name AS "Parent Name",
+    peo.employee_number AS "Parent EIN",
+    mat.position_id     AS "MatPAPos",
+    SUBSTR(name, 5,3)   AS "PHOrg"
+  FROM hr.per_all_people_f peo,
+    hr.per_all_assignments_f mat,
+    hr.hr_all_organization_units org
+  WHERE TRUNC(sysdate) BETWEEN peo.effective_start_date AND peo.effective_end_date
+  AND TRUNC(sysdate) BETWEEN mat.effective_start_date AND mat.effective_end_date
+  AND peo.person_id             = mat.person_id
+  AND mat.organization_id       = org.organization_id
+  AND mat.primary_flag          = 'Y'
+  AND peo.current_employee_flag = 'Y'
+  ),
+  (SELECT DISTINCT(hie.district)AS "CDistrict",
+    hie.region                  AS "CRegion",
+    hie.division                AS "CGroup"
+  FROM apps.fdv_store_org_hierarchy hie
+  ),
+  (SELECT DISTINCT(hie.district)AS "PDistrict",
+    hie.region                  AS "PRegion",
+    hie.division                AS "PGroup"
+  FROM apps.fdv_store_org_hierarchy hie
+  )
+WHERE pose.pos_STRUCTURE_VERSION_ID = posv.pos_STRUCTURE_VERSION_ID
+AND posv.position_STRUCTURE_ID      = pos.position_STRUCTURE_ID
+AND pos.name                       IN ('FD Primary Position')
+AND parent.position_id              = pose.parent_position_id
+AND sub.position_id                 = pose.subordinate_position_id
+AND (parent.name LIKE 'Area Operations Manager%'
+OR parent.name LIKE 'District Manager%')
+AND (sub.name LIKE 'Area Operations Manager%'
+OR sub.name LIKE 'District Manager%')
+AND sub.position_id    = "MatCHPos" (+)
+AND parent.position_id = "MatPAPos" (+)
+AND "CHOrg"            = "CDistrict" (+)
+AND "PHOrg"            = "PDistrict" (+)
+ORDER BY parent.name ,
+  sub.name 
