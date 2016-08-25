@@ -1,0 +1,137 @@
+SELECT 'TMP'
+  ||loc.attribute3
+  ||'001' AS "TCC Record Identifier",
+  'TMP'
+  ||loc.attribute3
+  ||'001'                         AS "Requisition Number",
+  'grecruiter'                    AS "Hiring Manager Login Name",
+  'grecruiter'                    AS "Recruiter",
+  'En'                            AS "Language",
+  '3'                             AS "Job Status",
+  NULL                            AS "Number to Hire",
+  'True'                          AS "Unlimited Hire",
+  'Customer Service Team Members' AS "Job Field Customer Code",
+  org.organization_id             AS "Organization Customer Code",
+  loc.location_id                 AS "Primary Location Customer Code",
+  'Store_Operations'                AS "User Group Customer Code",
+  loc.region_2
+  ||' Temporary Customer Service Representative' AS "Title",
+  'New-Remodel Staff.1.98.209'                   AS "Reference Title",
+  org.organization_id                      AS "Department",
+  '2'                                      AS "Hourly",
+  CASE
+    WHEN loc.region_2 = 'AK'
+    THEN 'AK Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'AL'
+    THEN 'AL Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'AR'
+    THEN 'AR Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'AZ'
+    THEN 'AZ Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'CA'
+    THEN 'CA Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'CO'
+    THEN 'CO Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'CT'
+    THEN 'CT Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'DC'
+    THEN 'DC Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'DE'
+    THEN 'DE Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'FL'
+    THEN 'FL Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'GA'
+    THEN 'GA Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'HI'
+    THEN 'HI Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'IA'
+    THEN 'IA Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'ID'
+    THEN 'ID Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'IL'
+    THEN 'ILTemporary Customer Service Representative'
+    WHEN loc.region_2 = 'IN'
+    THEN 'IN Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'KS'
+    THEN 'KS Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'KY'
+    THEN 'KY Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'LA'
+    THEN 'LA Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'MA'
+    THEN 'MA Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'MD'
+    THEN 'MD Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'ME'
+    THEN 'ME Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'MI'
+    THEN 'MI Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'MN'
+    THEN 'MN Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'MO'
+    THEN 'MO Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'MS'
+    THEN 'MS Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'MT'
+    THEN 'MT Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'NC'
+    THEN 'NC Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'ND'
+    THEN 'ND Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'NE'
+    THEN 'NE Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'NH'
+    THEN 'NH Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'NJ'
+    THEN 'NJ Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'NM'
+    THEN 'NM Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'NV'
+    THEN 'NV Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'NY'
+    THEN 'NY Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'OH'
+    THEN 'OH Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'OK'
+    THEN 'OK Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'OR'
+    THEN 'OR Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'PA'
+    THEN 'PA Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'PR'
+    THEN 'PR Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'RI'
+    THEN 'RI Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'SC'
+    THEN 'SC Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'SD'
+    THEN 'SD Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'TN'
+    THEN 'TN Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'TX'
+    THEN 'TX Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'UT'
+    THEN 'UT Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'VA'
+    THEN 'VA Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'VI'
+    THEN 'VI Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'VT'
+    THEN 'VT Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'WA'
+    THEN 'WA Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'WI'
+    THEN 'WI Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'WV'
+    THEN 'WV Temporary Customer Service Representative'
+    WHEN loc.region_2 = 'WY'
+    THEN 'WY Temporary Customer Service Representative'
+    ELSE 'ERROR'
+  END AS "Job Template Code"
+FROM hr.hr_locations_all loc,
+  hr.hr_all_organization_units org
+WHERE loc.inactive_date IS NULL
+AND org.location_id      = loc.location_id
+AND org.type             = 'STORE'
+AND loc.attribute3        IN ('08435','08180','08531','08640')
+AND org.name LIKE '98%'
