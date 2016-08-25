@@ -1,0 +1,171 @@
+SELECT 'CSR'
+  ||loc.attribute3
+  ||'001' AS "TCC Record Identifier",
+  'CSR'
+  ||loc.attribute3
+  ||'001'                               AS "Requisition Number",
+  '8'                                   AS "Career Section Code",
+  TO_CHAR(TRUNC(sysdate), 'yyyy-mm-dd') AS "Start Date",
+  NULL                                  AS "End Date",
+  'false'                               AS "Hot Job"
+FROM hr.hr_locations_all loc,
+  hr.hr_all_organization_units org
+WHERE loc.inactive_date IS NULL
+AND org.location_id      = loc.location_id
+AND org.type             = 'STORE'
+AND loc.attribute3      IN ('08228','08224')
+UNION
+SELECT 'CSR'
+  ||loc.attribute3
+  ||'001' AS "TCC Record Identifier",
+  'CSR'
+  ||loc.attribute3
+  ||'001'                               AS "Requisition Number",
+  '9'                                   AS "Career Section Code",
+  TO_CHAR(TRUNC(sysdate), 'yyyy-mm-dd') AS "Start Date",
+  NULL                                  AS "End Date",
+  'false'                               AS "Hot Job"
+FROM hr.hr_locations_all loc,
+  hr.hr_all_organization_units org
+WHERE loc.inactive_date IS NULL
+AND org.location_id      = loc.location_id
+AND org.type             = 'STORE'
+AND loc.attribute3      IN ('08228','08224')
+UNION
+SELECT 'CSR'
+  ||loc.attribute3
+  ||'001' AS "TCC Record Identifier",
+  'CSR'
+  ||loc.attribute3
+  ||'001' AS "Requisition Number",
+  CASE
+    WHEN loc.region_2 = 'ME'
+    THEN '12'
+    WHEN loc.region_2 IN ('IA','LA','MD','MN','NV','NY','OK','VT')
+    THEN '11'
+    WHEN loc.region_2 NOT IN ('IA','LA','MD','MN','NV','NY','OK','VT','ME')
+    THEN '10'
+  END                                   AS "Career Section Code",
+  TO_CHAR(TRUNC(sysdate), 'yyyy-mm-dd') AS "Start Date",
+  NULL                                  AS "End Date",
+  'false'                               AS "Hot Job"
+FROM hr.hr_locations_all loc,
+  hr.hr_all_organization_units org
+WHERE loc.inactive_date IS NULL
+AND org.location_id      = loc.location_id
+AND org.type             = 'STORE'
+AND loc.attribute3      IN ('08228','08224')
+union
+SELECT 'ASM'
+  ||loc.attribute3
+  ||'001' AS "TCC Record Identifier",
+  'ASM'
+  ||loc.attribute3
+  ||'001'                               AS "Requisition Number",
+  '8'                                   AS "Career Section Code",
+  TO_CHAR(TRUNC(sysdate), 'yyyy-mm-dd') AS "Start Date",
+  NULL                                  AS "End Date",
+  'false'                               AS "Hot Job"
+FROM hr.hr_locations_all loc,
+  hr.hr_all_organization_units org
+WHERE loc.inactive_date IS NULL
+AND org.location_id      = loc.location_id
+AND org.type             = 'STORE'
+AND loc.attribute3      IN ('08228','08224')
+UNION
+SELECT 'ASM'
+  ||loc.attribute3
+  ||'001' AS "TCC Record Identifier",
+  'ASM'
+  ||loc.attribute3
+  ||'001'                               AS "Requisition Number",
+  '9'                                   AS "Career Section Code",
+  TO_CHAR(TRUNC(sysdate), 'yyyy-mm-dd') AS "Start Date",
+  NULL                                  AS "End Date",
+  'false'                               AS "Hot Job"
+FROM hr.hr_locations_all loc,
+  hr.hr_all_organization_units org
+WHERE loc.inactive_date IS NULL
+AND org.location_id      = loc.location_id
+AND org.type             = 'STORE'
+AND loc.attribute3      IN ('08228','08224')
+UNION
+SELECT 'ASM'
+  ||loc.attribute3
+  ||'001' AS "TCC Record Identifier",
+  'ASM'
+  ||loc.attribute3
+  ||'001' AS "Requisition Number",
+  CASE
+    WHEN loc.region_2 = 'ME'
+    THEN '12'
+    WHEN loc.region_2 <> 'ME'
+    THEN '13'
+  END                                   AS "Career Section Code",
+  TO_CHAR(TRUNC(sysdate), 'yyyy-mm-dd') AS "Start Date",
+  NULL                                  AS "End Date",
+  'false'                               AS "Hot Job"
+FROM hr.hr_locations_all loc,
+  hr.hr_all_organization_units org
+WHERE loc.inactive_date IS NULL
+AND org.location_id      = loc.location_id
+AND org.type             = 'STORE'
+AND loc.attribute3      IN ('08228','08224');
+
+SELECT 'TMP'
+  ||loc.attribute3
+  ||'001' AS "TCC Record Identifier",
+  'TMP'
+  ||loc.attribute3
+  ||'001'                               AS "Requisition Number",
+  '8'                                   AS "Career Section Code",
+  TO_CHAR(TRUNC(sysdate), 'yyyy-mm-dd') AS "Start Date",
+  NULL                                  AS "End Date",
+  'false'                               AS "Hot Job"
+FROM hr.hr_locations_all loc,
+  hr.hr_all_organization_units org
+WHERE loc.inactive_date IS NULL
+AND org.location_id      = loc.location_id
+AND org.type             = 'STORE'
+AND loc.attribute3      IN ('08228','08224')
+UNION
+SELECT 'TMP'
+  ||loc.attribute3
+  ||'001' AS "TCC Record Identifier",
+  'TMP'
+  ||loc.attribute3
+  ||'001'                               AS "Requisition Number",
+  '9'                                   AS "Career Section Code",
+  TO_CHAR(TRUNC(sysdate), 'yyyy-mm-dd') AS "Start Date",
+  NULL                                  AS "End Date",
+  'false'                               AS "Hot Job"
+FROM hr.hr_locations_all loc,
+  hr.hr_all_organization_units org
+WHERE loc.inactive_date IS NULL
+AND org.location_id      = loc.location_id
+AND org.type             = 'STORE'
+AND loc.attribute3      IN ('08228','08224')
+UNION
+SELECT 'TMP'
+  ||loc.attribute3
+  ||'001' AS "TCC Record Identifier",
+  'TMP'
+  ||loc.attribute3
+  ||'001' AS "Requisition Number",
+  CASE
+    WHEN loc.region_2 = 'ME'
+    THEN '12'
+    WHEN loc.region_2 IN ('IA','LA','MD','MN','NV','NY','OK','VT')
+    THEN '11'
+    WHEN loc.region_2 NOT IN ('IA','LA','MD','MN','NV','NY','OK','VT','ME')
+    THEN '10'
+  END                                   AS "Career Section Code",
+  TO_CHAR(TRUNC(sysdate), 'yyyy-mm-dd') AS "Start Date",
+  NULL                                  AS "End Date",
+  'false'                               AS "Hot Job"
+FROM hr.hr_locations_all loc,
+  hr.hr_all_organization_units org
+WHERE loc.inactive_date IS NULL
+AND org.location_id      = loc.location_id
+AND org.type             = 'STORE'
+AND loc.attribute3      IN ('08228','08224')
