@@ -1,0 +1,8 @@
+SELECT DISTINCT A.MARITAL_STATUS,
+  z.meaning "Marital Status Desc",
+  a.employee_number
+FROM hr.per_all_people_f a,
+  apps.hr_lookups z
+WHERE TRUNC(sysdate) BETWEEN a.effective_start_date AND a.effective_end_date
+AND A.MARITAL_STATUS = z.lookup_code
+AND Z.lookup_type    = 'MAR_STATUS';
